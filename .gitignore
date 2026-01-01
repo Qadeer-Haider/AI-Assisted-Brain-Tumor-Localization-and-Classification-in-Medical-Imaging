@@ -1,0 +1,29 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Virtual environment
+venv/
+.env/
+
+# Jupyter
+.ipynb_checkpoints/
+
+# Data (never commit raw medical data)
+data/
+
+# Model checkpoints
+checkpoints/
+*.pth
+*.pt
+
+# Logs & experiments
+experiments/
+results/
+
+# OS
+.DS_Store
+Thumbs.db
+.idea
