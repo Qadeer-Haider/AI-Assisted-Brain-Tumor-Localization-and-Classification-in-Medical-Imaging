@@ -12,7 +12,9 @@ venv/
 .ipynb_checkpoints/
 
 # Data (never commit raw medical data)
-data/
+data/processed
+data/raw
+
 
 # Model checkpoints
 checkpoints/
