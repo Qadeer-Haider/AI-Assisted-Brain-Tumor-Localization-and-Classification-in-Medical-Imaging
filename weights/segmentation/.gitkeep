@@ -1,0 +1,6 @@
+# Segmentation weights directory
+# Model weights will be saved here during training
+
+# Example files (future):
+# - UNet_best_weights.keras
+# - UNet_ResNet_best_weights.keras

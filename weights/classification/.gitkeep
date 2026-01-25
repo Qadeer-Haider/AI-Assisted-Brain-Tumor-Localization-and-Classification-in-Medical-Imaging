@@ -1,0 +1,7 @@
+# Classification weights directory
+# Model weights will be saved here during training
+
+# Example files:
+# - ConvNeXt_best_weights.keras
+# - ResNet152V2_best_weights.keras
+# - DenseNet201_best_weights.keras

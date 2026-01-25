@@ -1,31 +1,91 @@
+# ═══════════════════════════════════════════════════════════════════════════════
 # Python
+# ═══════════════════════════════════════════════════════════════════════════════
 __pycache__/
 *.pyc
 *.pyo
 *.pyd
+*.egg-info/
+*.egg
+.eggs/
+dist/
+build/
+.pytest_cache/
+.mypy_cache/
 
-# Virtual environment
+# ═══════════════════════════════════════════════════════════════════════════════
+# Virtual Environment
+# ═══════════════════════════════════════════════════════════════════════════════
 venv/
+.venv/
 .env/
+env/
 
+# ═══════════════════════════════════════════════════════════════════════════════
 # Jupyter
+# ═══════════════════════════════════════════════════════════════════════════════
 .ipynb_checkpoints/
+*.ipynb_checkpoints
 
+# ═══════════════════════════════════════════════════════════════════════════════
 # Data (never commit raw medical data)
-data/processed
-data/raw
+# ═══════════════════════════════════════════════════════════════════════════════
+data/processed/
+data/raw/
+data/brisc2025/
 
-
-# Model checkpoints
-checkpoints/
+# ═══════════════════════════════════════════════════════════════════════════════
+# Model Weights (large files - use Git LFS or don't commit)
+# ═══════════════════════════════════════════════════════════════════════════════
+weights/classification/*.keras
+weights/classification/*.h5
+weights/segmentation/*.keras
+weights/segmentation/*.h5
 *.pth
 *.pt
+*.onnx
 
-# Logs & experiments
-experiments/
-results/
+# Keep .gitkeep files
+!weights/classification/.gitkeep
+!weights/segmentation/.gitkeep
 
-# OS
+# ═══════════════════════════════════════════════════════════════════════════════
+# Training Logs (large TensorBoard files only)
+# ═══════════════════════════════════════════════════════════════════════════════
+# TensorBoard logs can be very large
+logs/classification/tensorboard/
+logs/segmentation/tensorboard/
+
+# Keep .gitkeep files
+!logs/classification/.gitkeep
+!logs/segmentation/.gitkeep
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# IDE & Editor
+# ═══════════════════════════════════════════════════════════════════════════════
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# OS Files
+# ═══════════════════════════════════════════════════════════════════════════════
 .DS_Store
 Thumbs.db
-.idea
+desktop.ini
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# Misc
+# ═══════════════════════════════════════════════════════════════════════════════
+*.log
+*.tmp
+.coverage
+htmlcov/
+
+# Temporary utility scripts
+fix_*.py
+
+# Google Gemini artifacts
+.gemini/

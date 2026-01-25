@@ -1,0 +1,6 @@
+# Classification training logs directory
+# Training metrics will be saved here
+
+# Example files:
+# - ConvNeXt_training_log.csv
+# - ResNet152V2_training_log.csv

@@ -1,0 +1,75 @@
+# ═══════════════════════════════════════════════════════════════════════════════
+# SEGMENTATION TRAINING CONFIGURATION
+# ═══════════════════════════════════════════════════════════════════════════════
+# This file contains hyperparameters for brain tumor segmentation training.
+# NOTE: Segmentation module is a placeholder - to be implemented.
+
+# ─────────────────────────────────────────────────────────────────────────────────
+# MODEL SETTINGS
+# ─────────────────────────────────────────────────────────────────────────────────
+# Available models (future):
+#   - UNet
+#   - UNet_ResNet (U-Net with ResNet encoder)
+#   - AttentionUNet
+
+model_name: "UNet"
+encoder_filters: [64, 128, 256, 512, 1024]
+dropout_rate: 0.3
+num_classes: 1  # Binary segmentation
+
+# ─────────────────────────────────────────────────────────────────────────────────
+# DATA SETTINGS
+# ─────────────────────────────────────────────────────────────────────────────────
+img_size: [224, 224]
+batch_size: 16
+val_split: 0.2
+random_seed: 42
+
+# Data paths (relative to project root, or absolute paths)
+train_images_dir: null  # defaults to data/brisc2025/segmentation_task/train/images
+train_masks_dir: null   # defaults to data/brisc2025/segmentation_task/train/masks
+test_images_dir: null   # defaults to data/brisc2025/segmentation_task/test/images
+test_masks_dir: null    # defaults to data/brisc2025/segmentation_task/test/masks
+
+# ─────────────────────────────────────────────────────────────────────────────────
+# TRAINING SETTINGS
+# ─────────────────────────────────────────────────────────────────────────────────
+learning_rate: 0.0001
+epochs: 200
+
+# Loss function: "dice", "bce", "bce_dice", "focal", "tversky"
+loss: "bce_dice"
+loss_weights:
+  bce: 0.5
+  dice: 0.5
+
+# ─────────────────────────────────────────────────────────────────────────────────
+# AUGMENTATION SETTINGS
+# ─────────────────────────────────────────────────────────────────────────────────
+augmentation:
+  enabled: true
+  horizontal_flip: true
+  vertical_flip: false
+  rotation_range: 0.1
+
+# ─────────────────────────────────────────────────────────────────────────────────
+# CALLBACK SETTINGS
+# ─────────────────────────────────────────────────────────────────────────────────
+early_stopping:
+  monitor: "val_dice_coefficient"
+  mode: "max"
+  patience: 30
+  restore_best_weights: true
+
+reduce_lr:
+  monitor: "val_loss"
+  factor: 0.5
+  patience: 10
+
+use_tensorboard: false
+
+# ─────────────────────────────────────────────────────────────────────────────────
+# OUTPUT SETTINGS
+# ─────────────────────────────────────────────────────────────────────────────────
+weights_dir: null  # defaults to weights/segmentation/
+logs_dir: null     # defaults to logs/segmentation/

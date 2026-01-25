@@ -1,0 +1,5 @@
+# Segmentation training logs directory
+# Training metrics will be saved here
+
+# Example files (future):
+# - UNet_training_log.csv

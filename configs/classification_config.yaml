@@ -1,0 +1,73 @@
+# ═══════════════════════════════════════════════════════════════════════════════
+# CLASSIFICATION TRAINING CONFIGURATION
+# ═══════════════════════════════════════════════════════════════════════════════
+# This file contains all hyperparameters for brain tumor classification training.
+# Modify values here instead of in code for reproducible experiments.
+
+# ─────────────────────────────────────────────────────────────────────────────────
+# MODEL SETTINGS
+# ─────────────────────────────────────────────────────────────────────────────────
+# Available models (based on trained weights):
+#   - ResNet152V2
+#   - DenseNet201
+#   - VGG16
+#   - EfficientNetV2S
+#   - ConvNeXtBase
+
+model_name: "ConvNeXtBase"
+use_attention: false
+trainable_backbone: false
+dropout_rate: 0.3
+dense_units: 256
+
+# ─────────────────────────────────────────────────────────────────────────────────
+# DATA SETTINGS
+# ─────────────────────────────────────────────────────────────────────────────────
+img_size: [224, 224]
+batch_size: 32
+val_split: 0.2
+random_seed: 42
+
+# Data paths (relative to project root, or absolute paths)
+# Leave as null to use default paths
+train_dir: null  # defaults to data/brisc2025/classification_task/train
+test_dir: null   # defaults to data/brisc2025/classification_task/test
+
+# ─────────────────────────────────────────────────────────────────────────────────
+# TRAINING SETTINGS
+# ─────────────────────────────────────────────────────────────────────────────────
+learning_rate: 0.0001  # 1e-4
+epochs: 300
+use_class_weights: true
+
+# ─────────────────────────────────────────────────────────────────────────────────
+# AUGMENTATION SETTINGS
+# ─────────────────────────────────────────────────────────────────────────────────
+# Conservative augmentation for medical imaging
+augmentation:
+  enabled: true
+  horizontal_flip: true
+  rotation_range: 0.028  # ~10 degrees
+
+# ─────────────────────────────────────────────────────────────────────────────────
+# CALLBACK SETTINGS
+# ─────────────────────────────────────────────────────────────────────────────────
+early_stopping:
+  monitor: "val_loss"
+  patience: 30
+  restore_best_weights: true
+
+reduce_lr:
+  monitor: "val_loss"
+  factor: 0.5
+  patience: 10
+
+# TensorBoard logging (set to true for detailed visualization)
+use_tensorboard: false
+
+# ─────────────────────────────────────────────────────────────────────────────────
+# OUTPUT SETTINGS
+# ─────────────────────────────────────────────────────────────────────────────────
+# Leave as null to use default directories
+weights_dir: null  # defaults to weights/classification/
+logs_dir: null     # defaults to logs/classification/
