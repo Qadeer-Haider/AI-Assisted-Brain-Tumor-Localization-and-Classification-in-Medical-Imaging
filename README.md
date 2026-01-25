@@ -195,9 +195,9 @@ This project uses the **BRISC2025** (Brain Tumor Image Segmentation & Classifica
 - **3 anatomical planes**: Axial, Coronal, Sagittal
 - Physician-validated pixel-level segmentation masks
 
-### 🔄 Data Splitting Strategy
+### 🔄 Data Splitting Strategy (Classification Task)
 
-To ensure robust evaluation and prevent data leakage, we utilize a **Stratified Shuffle Split** technique:
+To ensure robust evaluation for our **classification models** and prevent data leakage, we utilize a **Stratified Shuffle Split** technique:
 
 - **Stratification Method**: Data is stratified based on *both* **Tumor Class** and **Anatomical Plane** (Axial, Coronal, Sagittal). This ensures that every subset of data preserves the original distribution of tumor types and viewing angles, preventing biases toward specific orientations.
 - **Split Ratios**:
