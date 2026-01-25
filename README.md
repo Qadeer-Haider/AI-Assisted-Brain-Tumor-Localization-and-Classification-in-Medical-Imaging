@@ -218,9 +218,14 @@ To ensure robust evaluation and prevent data leakage, we utilize a **Stratified 
 
 ## 📈 Results
 
-### Performance Visualization
+> ℹ️ **Note**: The results and visualizations below are specific to the **Classification Task**.
+>
+> 🚧 **Segmentation Task**: Results and visualizations for tumor segmentation will be added soon!
+
+### 🔍 Classification Performance
 
 Here are the comparative results of our trained models. **ConvNeXtBase** and **EfficientNetV2S** demonstrated superior performance across key metrics.
+
 
 #### 🏆 Model Comparison
 ![Model Comparison](logs/classification/all_models_comparison.png)
