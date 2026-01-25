@@ -6,6 +6,7 @@
 ![TensorFlow](https://img.shields.io/badge/TensorFlow-2.10%2B-orange?logo=tensorflow&logoColor=white)
 ![License](https://img.shields.io/badge/License-MIT-green)
 ![Status](https://img.shields.io/badge/Status-Active-success)
+![Phase](https://img.shields.io/badge/Phase-1_Classification-blueviolet)
 
 **A deep learning framework for brain tumor detection and localization using MRI images**
 
@@ -17,21 +18,30 @@
 
 ## 📋 Overview
 
-This project provides a modular deep learning framework for:
+This project is a comprehensive deep learning solution for medical imaging analysis, designed to assist in the automated detection of brain tumors.
 
-1. **Classification**: Detect and classify brain tumors into 4 categories (Glioma, Meningioma, Pituitary, No Tumor)
-2. **Segmentation**: Localize tumors by predicting pixel-wise masks *(coming soon)*
+**Current Focus (Phase 1): Classification**
+- Robustly classifying MRI slices into 4 categories: **Glioma, Meningioma, Pituitary, and No Tumor**.
+- Utilizing advanced transfer learning architectures (ConvNeXt, EfficientNetV2, etc.).
+- Implementing rigorous evaluation metrics suitable for medical diagnosis support.
 
-Built with transfer learning using state-of-the-art architectures and trained on the BRISC2025 dataset.
+**Future Focus (Phase 2): Segmentation** *(Coming Soon)*
+- Pixel-wise localization of tumor regions to assist in surgical planning.
 
 ## ✨ Features
 
+### ✅ Classification (Current)
 - 🏗️ **Multiple Architectures**: ResNet, DenseNet, VGG, EfficientNetV2, ConvNeXt
-- 🔧 **Modular Design**: Clean, well-organized codebase suitable for research and production
-- ⚙️ **YAML Configuration**: Easy hyperparameter management without code changes
-- 📊 **Medical Metrics**: Focus on recall to minimize false negatives (missing tumors)
-- 📈 **Class Balancing**: Automatic class weight computation for imbalanced datasets
-- 🎨 **Rich Output**: Beautiful console output with progress bars and formatted tables
+- 🔧 **Modular Design**: Production-ready codebase offering easy extensibility
+- ⚙️ **YAML Configuration**: Centralized hyperparameter management
+- 📊 **Medical Metrics**: Optimized for Recall and F1-Score to minimize false negatives
+- 📈 **Class Balancing**: Automatic weight computation for imbalanced datasets
+- 🎨 **Visualizations**: Comprehensive performance plots (AUC, Confusion Matrices)
+
+### 🚧 Segmentation (Upcoming)
+- 🧩 **U-Net Integration**: Implementation of U-Net and Attention U-Net
+- 🎯 **Mask Generation**: Precise tumor boundary detection
+- 📐 **Dice Coefficient**: Advanced segmentation evaluation metrics
 
 ## 📁 Project Structure
 
@@ -42,7 +52,7 @@ AI-Assisted-Brain-Tumor-Localization-and-Classification/
 │   └── segmentation_config.yaml
 ├── data/                       # Dataset directory
 │   └── brisc2025/
-│       ├── classification_task/
+│       ├── classification_task/ # Current active dataset
 │       └── segmentation_task/
 ├── notebooks/                  # Jupyter notebooks
 │   ├── evaluate_all_models.ipynb
@@ -52,19 +62,11 @@ AI-Assisted-Brain-Tumor-Localization-and-Classification/
 │   ├── train_classifier.py
 │   ├── evaluate_classifier.py
 │   ├── predict_single.py
-│   ├── train_segmentor.py      # Placeholder
-│   └── predict_mask.py         # Placeholder
+│   ├── train_segmentor.py      # (Pending)
+│   └── predict_mask.py         # (Pending)
 ├── src/                        # Main source package
-│   ├── classification/         # Classification module
-│   │   ├── data/               # Data loading & preprocessing
-│   │   ├── models/             # Model architectures
-│   │   ├── training/           # Training utilities
-│   │   └── inference/          # Prediction & evaluation
-│   ├── segmentation/           # Segmentation module (placeholder)
-│   │   ├── data/
-│   │   ├── models/
-│   │   ├── training/
-│   │   └── inference/
+│   ├── classification/         # Classification module (Complete)
+│   ├── segmentation/           # Segmentation module (In Progress)
 │   └── utils/                  # Shared utilities
 ├── weights/                    # Saved model weights
 ├── logs/                       # Training logs
@@ -73,16 +75,13 @@ AI-Assisted-Brain-Tumor-Localization-and-Classification/
 └── README.md
 ```
 
-
 ## 🚀 Installation
 
 ### Prerequisites
-
 - Python 3.8+
 - CUDA-compatible GPU (recommended for training)
 
 ### Setup
-
 ```bash
 # Clone the repository
 git clone https://github.com/Qadeer-Haider/AI-Assisted-Brain-Tumor-Localization-and-Classification-in-Medical-Imaging.git
@@ -99,30 +98,24 @@ pip install -r requirements.txt
 pip install -e .
 ```
 
-## 💻 Usage
+## 💻 Usage (Classification)
 
 ### Training
-
 ```bash
 # Train with default configuration (ConvNeXt)
 python scripts/train_classifier.py
 
 # Train specific model
 python scripts/train_classifier.py --model ResNet152V2 --epochs 100
-
-# Train with custom config
-python scripts/train_classifier.py --config configs/classification_config.yaml
 ```
 
 ### Evaluation
-
 ```bash
 # Evaluate trained model
 python scripts/evaluate_classifier.py --weights weights/classification/ConvNeXt_best_weights.keras
 ```
 
 ### Prediction
-
 ```bash
 # Predict single image
 python scripts/predict_single.py \
@@ -130,28 +123,9 @@ python scripts/predict_single.py \
     --weights weights/classification/ConvNeXt_best_weights.keras
 ```
 
-### Python API
+## 🏗️ Classification Models
 
-```python
-from src.classification import TumorClassifier, ClassificationTrainer
-
-# Quick prediction
-classifier = TumorClassifier("weights/classification/model.keras")
-result = classifier.predict("path/to/mri_scan.jpg")
-print(f"Prediction: {result['class']} ({result['confidence']:.1f}%)")
-
-# Training
-trainer = ClassificationTrainer(model_name="ConvNeXt")
-trainer.prepare_data()
-trainer.build()
-trainer.compile()
-trainer.train(epochs=100)
-trainer.evaluate()
-```
-
-## 🏗️ Models
-
-### Available Architectures
+We leverage state-of-the-art architectures initialized with ImageNet weights and fine-tuned for medical imaging:
 
 | Model | Parameters | Best Use Case |
 |-------|------------|---------------|
@@ -159,43 +133,18 @@ trainer.evaluate()
 | **EfficientNetV2** | ~21M | Balance of speed & accuracy |
 | **ResNet152V2** | ~58M | Deep feature extraction |
 | **DenseNet201** | ~18M | Feature reuse & efficiency |
-| **VGG16** | ~14M | Classic architecture |
+| **VGG16** | ~14M | Classic baseline |
 
-### Architecture Overview
+## 📊 Dataset (Classification Task)
 
-```
-┌────────────────────────────────────────┐
-│            Input Image                  │
-│           (224 × 224 × 3)               │
-└────────────────────────────────────────┘
-                    ↓
-┌────────────────────────────────────────┐
-│         Backbone (Frozen)               │
-│  (ResNet/DenseNet/EfficientNet/ConvNeXt)│
-└────────────────────────────────────────┘
-                    ↓
-┌────────────────────────────────────────┐
-│     Universal Classification Head       │
-│  GAP → BN → Dense → Dropout (×2)       │
-└────────────────────────────────────────┘
-                    ↓
-┌────────────────────────────────────────┐
-│           Softmax Output                │
-│    [glioma, meningioma, no_tumor,      │
-│              pituitary]                 │
-└────────────────────────────────────────┘
-```
-
-## 📊 Dataset
-
-This project uses the **BRISC2025** (Brain Tumor Image Segmentation & Classification) dataset:
+This project uses the **BRISC2025** (Brain Tumor Image Segmentation & Classification) dataset.
+**Note:** We are currently utilizing the **Classification subset** of this dataset.
 
 - **6,000** T1-weighted MRI slices (5,000 train / 1,000 test)
 - **4 classes**: Glioma, Meningioma, Pituitary Tumor, No Tumor
 - **3 anatomical planes**: Axial, Coronal, Sagittal
-- Physician-validated pixel-level segmentation masks
 
-### 🔄 Data Splitting Strategy (Classification Task)
+### 🔄 Data Splitting Strategy (Classification)
 
 To ensure robust evaluation for our **classification models** and prevent data leakage, we utilize a **Stratified Shuffle Split** technique:
 
@@ -206,7 +155,6 @@ To ensure robust evaluation for our **classification models** and prevent data l
   - **Test**: Separate hold-out set (~1,000 images) used strictly for final performance evaluation
 
 ### Citation
-
 ```bibtex
 @article{fateh2025brisc,
   title={Brisc: Annotated dataset for brain tumor segmentation and classification with swin-hafnet},
@@ -222,10 +170,9 @@ To ensure robust evaluation for our **classification models** and prevent data l
 >
 > 🚧 **Segmentation Task**: Results and visualizations for tumor segmentation will be added soon!
 
-### 🔍 Classification Performance
+### 🔍 Performance Visualization
 
 Here are the comparative results of our trained models. **ConvNeXtBase** and **EfficientNetV2S** demonstrated superior performance across key metrics.
-
 
 #### 🏆 Model Comparison
 ![Model Comparison](logs/classification/all_models_comparison.png)
@@ -250,18 +197,26 @@ Here are the comparative results of our trained models. **ConvNeXtBase** and **E
 | ResNet152V2 | - | - | - | - |
 | EfficientNetV2 | - | - | - | - |
 
+## ⚠️ Medical Disclaimer
 
+> This software is intended for **research and educational purposes only**. It is NOT approved for clinical use and should NOT be used for medical diagnosis. Always consult qualified healthcare professionals for medical decisions.
 
 ## 🗺️ Roadmap
 
-- [x] Classification module
-- [x] Multiple backbone support
-- [x] Configuration management
-- [x] Training scripts
-- [ ] Segmentation module (U-Net)
-- [ ] Web demo interface
-- [ ] ONNX export for deployment
-- [ ] Docker containerization
+- [x] **Phase 1: Classification**
+    - [x] Data Loading & Preprocessing
+    - [x] Model Implementation (ConvNeXt, EfficientNet, etc.)
+    - [x] Training Pipeline & Logging
+    - [x] Evaluation & Visualization
+- [ ] **Phase 2: Segmentation**
+    - [ ] U-Net Architecture Implementation
+    - [ ] Mask Data Processing
+    - [ ] Segmentation Training Loop
+    - [ ] Mask Prediction Visualization
+- [ ] **Phase 3: Deployment**
+    - [ ] Web Interface (Streamlit)
+    - [ ] Docker Containerization
+    - [ ] ONNX Export
 
 ## 📄 License
 
