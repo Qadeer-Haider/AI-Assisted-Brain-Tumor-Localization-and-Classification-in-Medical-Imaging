@@ -164,11 +164,7 @@ To ensure robust evaluation for our **classification models** and prevent data l
 }
 ```
 
-## 📈 Results
 
-> ℹ️ **Note**: The results and visualizations below are specific to the **Classification Task**.
->
-> 🚧 **Segmentation Task**: Results and visualizations for tumor segmentation will be added soon!
 
 ### 🔍 Performance Visualization
 
@@ -189,18 +185,22 @@ Here are the comparative results of our trained models. **ConvNeXtBase** and **E
   <img src="logs/classification/auc_curves.png" width="45%" />
 </div>
 
-### Detailed Metrics
 
-| Model | Accuracy | Recall | Precision | AUC |
-|-------|----------|--------|-----------|-----|
-| ConvNeXt | - | - | - | - |
-| ResNet152V2 | - | - | - | - |
-| EfficientNetV2 | - | - | - | - |
+## 📈 Results
 
-## ⚠️ Medical Disclaimer
+Test set performance on 1,000 T1-weighted MRI slices from the BRISC2025 dataset:
 
-> This software is intended for **research and educational purposes only**. It is NOT approved for clinical use and should NOT be used for medical diagnosis. Always consult qualified healthcare professionals for medical decisions.
+| Model | Accuracy | Precision | Recall | F1 Score | AUC |
+|-------|----------|-----------|--------|----------|-----|
+| **DenseNet201** | 96.60% | 96.71% | 96.94% | 96.81% | 99.45% |
+| **ConvNeXt** | 95.60% | 95.82% | 95.97% | 95.85% | 99.63% |
+| **ResNet152V2** | 95.50% | 95.59% | 96.00% | 95.78% | 99.64% |
+| **EfficientNetV2S** | 95.40% | 95.89% | 95.80% | 95.81% | 99.57% |
+| **VGG16** | 95.20% | 95.51% | 95.67% | 95.56% | 98.99% |
 
+**Best Performing Model:** DenseNet201 with 96.60% accuracy
+
+*All models use transfer learning with frozen backbones and custom classification heads.*
 ## 🗺️ Roadmap
 
 - [x] **Phase 1: Classification**
