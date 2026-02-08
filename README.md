@@ -20,32 +20,37 @@
 
 This project is a comprehensive deep learning solution for medical imaging analysis, designed to assist in the automated detection of brain tumors.
 
-**Current Focus (Phase 1): Classification**
-- Robustly classifying MRI slices into 4 categories: **Glioma, Meningioma, Pituitary, and No Tumor**.
-- Utilizing advanced transfer learning architectures (ConvNeXt, EfficientNetV2, etc.).
-- Implementing rigorous evaluation metrics suitable for medical diagnosis support.
+### 🔬 Current Focus (Phase 1): Classification
+- **Robust Classification**: Classifying MRI slices into 4 categories: **Glioma**, **Meningioma**, **Pituitary**, and **No Tumor**.
+- **Advanced Architectures**: Utilizing transfer learning with ConvNeXt, EfficientNetV2, etc.
+- **Medical Metrics**: Implementing rigorous evaluation suitable for diagnosis support.
 
-**Future Focus (Phase 2): Segmentation** *(Coming Soon)*
-- Pixel-wise localization of tumor regions to assist in surgical planning.
+### 🔭 Future Focus (Phase 2): Segmentation *(Coming Soon)*
+- **Tumor Localization**: Pixel-wise localization of tumor regions to assist in surgical planning.
+- **Mask Generation**: Precise boundary detection.
+
+---
 
 ## ✨ Features
 
 ### ✅ Classification (Current)
-- 🏗️ **Multiple Architectures**: ResNet, DenseNet, VGG, EfficientNetV2, ConvNeXt
-- 🔧 **Modular Design**: Production-ready codebase offering easy extensibility
-- ⚙️ **YAML Configuration**: Centralized hyperparameter management
-- 📊 **Medical Metrics**: Optimized for Recall and F1-Score to minimize false negatives
-- 📈 **Class Balancing**: Automatic weight computation for imbalanced datasets
-- 🎨 **Visualizations**: Comprehensive performance plots (AUC, Confusion Matrices)
+- 🏗️ **Multiple Architectures**: ResNet, DenseNet, VGG, EfficientNetV2, ConvNeXt.
+- 🔧 **Modular Design**: Production-ready codebase offering easy extensibility.
+- ⚙️ **YAML Configuration**: Centralized hyperparameter management.
+- 📊 **Medical Metrics**: Optimized for Recall and F1-Score to minimize false negatives.
+- 📈 **Class Balancing**: Automatic weight computation for imbalanced datasets.
+- 🎨 **Visualizations**: Comprehensive performance plots (AUC, Confusion Matrices).
 
 ### 🚧 Segmentation (Upcoming)
-- 🧩 **U-Net Integration**: Implementation of U-Net and Attention U-Net
-- 🎯 **Mask Generation**: Precise tumor boundary detection
-- 📐 **Dice Coefficient**: Advanced segmentation evaluation metrics
+- 🧩 **U-Net Integration**: Implementation of U-Net and Attention U-Net.
+- 🎯 **Mask Generation**: Precise tumor boundary detection.
+- 📐 **Dice Coefficient**: Advanced segmentation evaluation metrics.
+
+---
 
 ## 📁 Project Structure
 
-```
+```text
 AI-Assisted-Brain-Tumor-Localization-and-Classification/
 ├── configs/                    # YAML configuration files
 │   ├── classification_config.yaml
@@ -75,6 +80,8 @@ AI-Assisted-Brain-Tumor-Localization-and-Classification/
 └── README.md
 ```
 
+---
+
 ## 🚀 Installation
 
 ### Prerequisites
@@ -82,6 +89,7 @@ AI-Assisted-Brain-Tumor-Localization-and-Classification/
 - CUDA-compatible GPU (recommended for training)
 
 ### Setup
+
 ```bash
 # Clone the repository
 git clone https://github.com/Qadeer-Haider/AI-Assisted-Brain-Tumor-Localization-and-Classification-in-Medical-Imaging.git
@@ -98,9 +106,12 @@ pip install -r requirements.txt
 pip install -e .
 ```
 
+---
+
 ## 💻 Usage (Classification)
 
 ### Training
+
 ```bash
 # Train with default configuration (ConvNeXt)
 python scripts/train_classifier.py
@@ -110,12 +121,14 @@ python scripts/train_classifier.py --model ResNet152V2 --epochs 100
 ```
 
 ### Evaluation
+
 ```bash
 # Evaluate trained model
 python scripts/evaluate_classifier.py --weights weights/classification/ConvNeXt_best_weights.keras
 ```
 
 ### Prediction
+
 ```bash
 # Predict single image
 python scripts/predict_single.py \
@@ -123,22 +136,27 @@ python scripts/predict_single.py \
     --weights weights/classification/ConvNeXt_best_weights.keras
 ```
 
+---
+
 ## 🏗️ Classification Models
 
 We leverage state-of-the-art architectures initialized with ImageNet weights and fine-tuned for medical imaging:
 
 | Model | Parameters | Best Use Case |
-|-------|------------|---------------|
+| :--- | :--- | :--- |
 | **ConvNeXt** | ~88M | State-of-the-art performance |
 | **EfficientNetV2** | ~21M | Balance of speed & accuracy |
 | **ResNet152V2** | ~58M | Deep feature extraction |
 | **DenseNet201** | ~18M | Feature reuse & efficiency |
 | **VGG16** | ~14M | Classic baseline |
 
+---
+
 ## 📊 Dataset (Classification Task)
 
 This project uses the **BRISC2025** (Brain Tumor Image Segmentation & Classification) dataset.
-**Note:** We are currently utilizing the **Classification subset** of this dataset.
+
+> **Note:** We are currently utilizing the **Classification subset** of this dataset.
 
 - **6,000** T1-weighted MRI slices (5,000 train / 1,000 test)
 - **4 classes**: Glioma, Meningioma, Pituitary Tumor, No Tumor
@@ -148,13 +166,14 @@ This project uses the **BRISC2025** (Brain Tumor Image Segmentation & Classifica
 
 To ensure robust evaluation for our **classification models** and prevent data leakage, we utilize a **Stratified Shuffle Split** technique:
 
-- **Stratification Method**: Data is stratified based on *both* **Tumor Class** and **Anatomical Plane** (Axial, Coronal, Sagittal). This ensures that every subset of data preserves the original distribution of tumor types and viewing angles, preventing biases toward specific orientations.
-- **Split Ratios**:
-  - **Train**: 80% of the training data (used for model weight optimization)
-  - **Validation**: 20% of the training data (used for hyperparameter tuning and early stopping)
-  - **Test**: Separate hold-out set (~1,000 images) used strictly for final performance evaluation
+1.  **Stratification Method**: Data is stratified based on *both* **Tumor Class** and **Anatomical Plane** (Axial, Coronal, Sagittal). This ensures that every subset of data preserves the original distribution of tumor types and viewing angles.
+2.  **Split Ratios**:
+    - **Train**: 80% (Optimization)
+    - **Validation**: 20% (Hyperparameter tuning & early stopping)
+    - **Test**: Separate hold-out set (~1,000 images)
 
 ### Citation
+
 ```bibtex
 @article{fateh2025brisc,
   title={Brisc: Annotated dataset for brain tumor segmentation and classification with swin-hafnet},
@@ -164,43 +183,76 @@ To ensure robust evaluation for our **classification models** and prevent data l
 }
 ```
 
+---
 
-
-### 🔍 Performance Visualization
+## 🔍 Performance Visualization
 
 Here are the comparative results of our trained models. **ConvNeXtBase** and **EfficientNetV2S** demonstrated superior performance across key metrics.
 
-#### 🏆 Model Comparison
+### 🏆 Comprehensive Model Evaluation
+![Comprehensive Evaluation](logs/classification/comprehensive_evaluation_results.png)
+
+### 📊 Model Comparison Summary
 ![Model Comparison](logs/classification/all_models_comparison.png)
 
-#### 📉 Training Dynamics
+### 📉 Training Dynamics
 <div align="center">
   <img src="logs/classification/accuracy_curves.png" width="45%" />
   <img src="logs/classification/loss_curves.png" width="45%" />
 </div>
 
-#### 🎯 Metric Analysis (Recall & AUC)
+### 🎯 Metric Analysis (Recall & AUC)
 <div align="center">
   <img src="logs/classification/recall_curves.png" width="45%" />
   <img src="logs/classification/auc_curves.png" width="45%" />
 </div>
 
+### 🧩 Confusion Matrices
+
+<details>
+<summary><b>Click to view individual model confusion matrices</b></summary>
+
+<div align="center">
+
+#### DenseNet201 (Best Model)
+<img src="logs/classification/DenseNet201_confusion_matrix.png" width="60%" />
+
+#### ConvNeXt
+<img src="logs/classification/ConvNeXt_confusion_matrix.png" width="60%" />
+
+#### ResNet152V2
+<img src="logs/classification/ResNet152V2_confusion_matrix.png" width="60%" />
+
+#### EfficientNetV2S
+<img src="logs/classification/EfficientNetV2S_confusion_matrix.png" width="60%" />
+
+#### VGG16
+<img src="logs/classification/VGG16_confusion_matrix.png" width="60%" />
+
+</div>
+
+</details>
+
+---
 
 ## 📈 Results
 
-Test set performance on 1,000 T1-weighted MRI slices from the BRISC2025 dataset:
+Test set performance on **1,000 T1-weighted MRI slices** from the BRISC2025 dataset:
 
 | Model | Accuracy | Precision | Recall | F1 Score | AUC |
-|-------|----------|-----------|--------|----------|-----|
+| :--- | :---: | :---: | :---: | :---: | :---: |
 | **DenseNet201** | 96.60% | 96.71% | 96.94% | 96.81% | 99.45% |
 | **ConvNeXt** | 95.60% | 95.82% | 95.97% | 95.85% | 99.63% |
 | **ResNet152V2** | 95.50% | 95.59% | 96.00% | 95.78% | 99.64% |
 | **EfficientNetV2S** | 95.40% | 95.89% | 95.80% | 95.81% | 99.57% |
 | **VGG16** | 95.20% | 95.51% | 95.67% | 95.56% | 98.99% |
 
-**Best Performing Model:** DenseNet201 with 96.60% accuracy
+> **Best Performing Model:** DenseNet201 with **96.60%** accuracy.
 
 *All models use transfer learning with frozen backbones and custom classification heads.*
+
+---
+
 ## 🗺️ Roadmap
 
 - [x] **Phase 1: Classification**
@@ -218,15 +270,19 @@ Test set performance on 1,000 T1-weighted MRI slices from the BRISC2025 dataset:
     - [ ] Docker Containerization
     - [ ] ONNX Export
 
+---
+
 ## 📄 License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
+---
+
 ## 🙏 Acknowledgments
 
-- BRISC2025 dataset creators and annotators
-- TensorFlow team for pre-trained models
-- Medical imaging research community
+- **BRISC2025** dataset creators and annotators.
+- **TensorFlow** team for pre-trained models.
+- Medical imaging research community.
 
 ---
 
