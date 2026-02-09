@@ -150,9 +150,7 @@ git commit -m "Add trained model weights"
 ## Download Pre-trained Weights
 
 If weights are too large for GitHub, download from:
-- **Google Drive**: [Link]
-- **Hugging Face**: [Link]
-- **Releases**: Check GitHub releases
+- **Google Drive**: [Download Weights](https://drive.google.com/drive/folders/1xtkmtTv6SF95hfEbGJkB1J7j5VA6-P8k?usp=drive_link)
 
 Extract to `weights/classification/` or `weights/segmentation/` directory.
 

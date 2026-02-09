@@ -9,7 +9,7 @@
 
 **A deep learning framework for brain tumor detection and localization using MRI images**
 
-[Features](#-features) • [Installation](#-installation) • [Usage](#-usage) • [Models](#️-models) • [Dataset](#-dataset) • [Results](#-results)
+[Features](#-features) • [Installation](#-installation) • [Usage](#-usage) • [Models](#️-models) • [**📦 Download Weights**](#-download-pre-trained-weights) • [Dataset](#-dataset) • [Results](#-results)
 
 </div>
 
@@ -216,7 +216,24 @@ We use **keras-unet-collection** for advanced segmentation architectures:
 
 ---
 
-## 📊 Dataset
+## � Download Pre-trained Weights
+
+Pre-trained model weights are available for immediate use:
+
+**📥 Quick Download:**
+- [**Download All Models**](https://drive.google.com/drive/folders/1xtkmtTv6SF95hfEbGJkB1J7j5VA6-P8k?usp=drive_link) - Classification & Segmentation weights
+
+**📂 After Downloading:**
+Extract the weights to the appropriate directory:
+- Classification models → `weights/classification/`
+- Segmentation models → `weights/segmentation/`
+
+**📖 Usage Instructions:**
+See [weights/README.md](weights/README.md) for detailed loading and usage instructions.
+
+---
+
+## �📊 Dataset
 
 This project uses the **BRISC2025** (Brain Tumor Image Segmentation & Classification) dataset, which includes both classification and segmentation tasks.
 
