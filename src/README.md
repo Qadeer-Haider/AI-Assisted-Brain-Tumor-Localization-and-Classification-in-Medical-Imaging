@@ -11,11 +11,11 @@ src/
 │   ├── models/             # Model architectures
 │   ├── training/           # Training utilities
 │   └── inference/          # Prediction & evaluation
-├── segmentation/           # Segmentation module (coming soon)
-│   ├── data/
-│   ├── models/
-│   ├── training/
-│   └── inference/
+├── segmentation/           # Segmentation module
+│   ├── data/               # Data loading & preprocessing
+│   ├── models/             # U-Net architectures
+│   ├── training/           # Training utilities
+│   └── inference/          # Prediction & evaluation
 └── utils/                  # Shared utilities
     ├── config.py          # Configuration management
     ├── constants.py       # Global constants
@@ -102,13 +102,78 @@ evaluator.print_classification_report()
 
 ### 🎯 Segmentation (`src/segmentation/`)
 
-Tumor segmentation implementation (coming soon).
+Complete implementation of brain tumor segmentation.
 
-Structure mirrors classification module:
-- Data loading and preprocessing
-- U-Net/DeepLab model architectures
-- Training with dice loss
-- Mask prediction and evaluation
+#### **Data** (`segmentation/data/`)
+- `dataset.py` - Image-mask pair loading with stratified splitting
+- `preprocessing.py` - Albumentations augmentation pipeline
+
+**Key Functions**:
+```python
+from src.segmentation.data import create_segmentation_datasets
+
+# Create train/val/test datasets
+train_ds, val_ds, test_ds = create_segmentation_datasets(
+    train_images_dir="data/train/images",
+    train_masks_dir="data/train/masks",
+    img_size=(256, 256),
+    batch_size=32,
+    use_augmentation=True
+)
+```
+
+#### **Models** (`segmentation/models/`)
+- `architectures.py` - U-Net variants (UNet, AttentionUNet, ResUNetPP, SwinUNet)
+- `builder.py` - Model factory with backbone support
+
+**Key Functions**:
+```python
+from src.segmentation.models import build_segmentation_model
+
+# Build segmentation model
+model = build_segmentation_model(
+    model_name="UNet",
+    input_shape=(256, 256, 3),
+    num_classes=1,
+    backbone="ResNet50",
+    freeze_backbone=True
+)
+```
+
+#### **Training** (`segmentation/training/`)
+- `trainer.py` - High-level training orchestration
+- `losses.py` - Segmentation losses (Dice, Tversky, BCE-Tversky, Focal)
+- `metrics.py` - Segmentation metrics (Dice, IoU, Sensitivity, Specificity)
+- `callbacks.py` - Training callbacks
+
+**Key Classes**:
+```python
+from src.segmentation.training import SegmentationTrainer
+
+trainer = SegmentationTrainer(
+    model_name="UNet",
+    loss_name="bce_tversky"
+)
+trainer.prepare_data("data/train/images", "data/train/masks")
+trainer.build()
+trainer.compile()
+trainer.train(epochs=200)
+```
+
+#### **Inference** (`segmentation/inference/`)
+- `predictor.py` - Mask prediction and visualization
+
+**Key Classes**:
+```python
+from src.segmentation.inference import TumorSegmentor
+
+# Prediction
+segmentor = TumorSegmentor("path/to/model.keras")
+mask = segmentor.predict("path/to/image.jpg")
+
+# Visualization
+segmentor.visualize("path/to/image.jpg", overlay=True)
+```
 
 ---
 
@@ -185,17 +250,29 @@ Edit `add_universal_head()` in `classification/models/heads.py`
 ## Import Conventions
 
 ```python
-# Data
+# Classification Data
 from src.classification.data import build_dataframe, make_dataset
 
-# Models
+# Classification Models
 from src.classification.models import build_model
 
-# Training
+# Classification Training
 from src.classification.training import ClassificationTrainer
 
-# Inference
+# Classification Inference
 from src.classification.inference import TumorClassifier, ClassificationEvaluator
+
+# Segmentation Data
+from src.segmentation.data import create_segmentation_datasets, get_training_augmentation
+
+# Segmentation Models
+from src.segmentation.models import build_segmentation_model, AVAILABLE_SEGMENTATION_MODELS
+
+# Segmentation Training
+from src.segmentation.training import SegmentationTrainer, get_loss_function, get_segmentation_metrics
+
+# Segmentation Inference
+from src.segmentation.inference import TumorSegmentor, predict_mask
 
 # Utils
 from src.utils.config import load_config

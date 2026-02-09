@@ -1,42 +1,164 @@
 """
 Preprocessing and augmentation for segmentation.
 
-Provides augmentation pipelines that apply identical transformations
-to both images and masks.
-
-TODO: Implement when segmentation notebook is ready.
+Provides Albumentations-based augmentation pipelines that apply 
+identical spatial transformations to both images and masks.
 """
 
-from typing import Tuple
+from typing import Callable, Tuple
 
+import numpy as np
 import tensorflow as tf
-from tensorflow.keras import layers
+
+try:
+    import albumentations as albu
+    ALBUMENTATIONS_AVAILABLE = True
+except ImportError:
+    ALBUMENTATIONS_AVAILABLE = False
+    print("⚠️ Albumentations not installed. Augmentation will be disabled.")
 
 
-def get_segmentation_augmentation() -> tf.keras.Sequential:
+def get_training_augmentation() -> "albu.Compose":
     """
-    Create augmentation pipeline for segmentation.
+    Create advanced augmentation pipeline using Albumentations.
     
-    Note: Augmentations for segmentation must be applied
-    identically to both images and masks.
+    All spatial transforms are applied consistently to both image and mask.
+    Pixel-level transforms are applied to image only.
     
     Returns:
-        Keras Sequential for augmentation.
+        Albumentations Compose pipeline.
         
-    Note:
-        This is a placeholder. Implementation pending.
+    Raises:
+        ImportError: If albumentations is not installed.
     """
-    raise NotImplementedError(
-        "Segmentation augmentation not yet implemented."
-    )
+    if not ALBUMENTATIONS_AVAILABLE:
+        raise ImportError(
+            "Albumentations is required for augmentation. "
+            "Install with: pip install albumentations"
+        )
+    
+    return albu.Compose([
+        # Spatial transforms (applied to both image and mask)
+        albu.HorizontalFlip(p=0.5),
+        albu.VerticalFlip(p=0.3),
+        albu.Affine(
+            scale=(0.85, 1.15),
+            translate_percent=(-0.1, 0.1),
+            rotate=(-25, 25),
+            p=0.7
+        ),
+        
+        # Elastic/distortion transforms (applied to both image and mask)
+        albu.ElasticTransform(alpha=1, sigma=50, p=0.3),
+        albu.GridDistortion(p=0.3),
+        albu.OpticalDistortion(distort_limit=0.1, p=0.3),
+        
+        # Pixel-level transforms (applied to image only, not mask)
+        albu.RandomBrightnessContrast(
+            brightness_limit=0.3,
+            contrast_limit=0.3,
+            p=0.5
+        ),
+        albu.RandomGamma(gamma_limit=(80, 120), p=0.3),
+        albu.GaussNoise(p=0.3),
+        albu.GaussianBlur(blur_limit=(3, 5), p=0.2),
+        albu.CLAHE(clip_limit=2.0, p=0.3),
+        
+        # Dropout (applied to both image and mask)
+        albu.CoarseDropout(
+            num_holes_range=(1, 8),
+            hole_height_range=(8, 16),
+            hole_width_range=(8, 16),
+            p=0.3
+        ),
+    ])
+
+
+def apply_augmentation(
+    image: np.ndarray,
+    mask: np.ndarray,
+    augmentation: "albu.Compose",
+) -> Tuple[np.ndarray, np.ndarray]:
+    """
+    Apply Albumentations augmentation to image and mask pair.
+    
+    Args:
+        image: Image tensor as numpy array (float32, [0,1]).
+        mask: Mask tensor as numpy array (float32, [0,1]).
+        augmentation: Albumentations Compose pipeline.
+        
+    Returns:
+        Tuple of augmented (image, mask) as float32 arrays.
+    """
+    # Convert to uint8 for Albumentations
+    image_uint8 = (image * 255).astype(np.uint8)
+    mask_uint8 = (mask * 255).astype(np.uint8)
+    
+    # Apply augmentation
+    augmented = augmentation(image=image_uint8, mask=mask_uint8)
+    
+    # Convert back to float32 [0, 1]
+    aug_image = augmented['image'].astype(np.float32) / 255.0
+    aug_mask = augmented['mask'].astype(np.float32) / 255.0
+    
+    # Ensure mask is binary
+    aug_mask = np.where(aug_mask > 0.5, 1.0, 0.0).astype(np.float32)
+    
+    # Ensure proper dimensions
+    if len(aug_mask.shape) == 2:
+        aug_mask = np.expand_dims(aug_mask, axis=-1)
+    
+    return aug_image, aug_mask
+
+
+def get_augmentation_fn(
+    img_size: Tuple[int, int] = (256, 256),
+) -> Callable[[tf.Tensor, tf.Tensor], Tuple[tf.Tensor, tf.Tensor]]:
+    """
+    Create a TensorFlow-compatible augmentation function.
+    
+    Uses tf.py_function to wrap Albumentations pipeline.
+    
+    Args:
+        img_size: Target image size (height, width).
+        
+    Returns:
+        Function that augments (image, mask) tensor pairs.
+    """
+    if not ALBUMENTATIONS_AVAILABLE:
+        # Return identity function if albumentations not available
+        def identity(image, mask):
+            return image, mask
+        return identity
+    
+    # Create augmentation pipeline
+    augmentation = get_training_augmentation()
+    
+    def _apply_aug(image: np.ndarray, mask: np.ndarray) -> Tuple[np.ndarray, np.ndarray]:
+        return apply_augmentation(image, mask, augmentation)
+    
+    def tf_augment(image: tf.Tensor, mask: tf.Tensor) -> Tuple[tf.Tensor, tf.Tensor]:
+        """TensorFlow wrapper for Albumentations augmentation."""
+        aug_img, aug_mask = tf.py_function(
+            func=_apply_aug,
+            inp=[image, mask],
+            Tout=[tf.float32, tf.float32]
+        )
+        # Set shapes (lost during py_function)
+        aug_img.set_shape([img_size[0], img_size[1], 3])
+        aug_mask.set_shape([img_size[0], img_size[1], 1])
+        return aug_img, aug_mask
+    
+    return tf_augment
 
 
 class SegmentationAugmentation(tf.keras.layers.Layer):
     """
-    Custom layer for segmentation augmentation.
+    Custom Keras layer for segmentation augmentation.
     
     Applies identical random transformations to both
-    image and mask tensors.
+    image and mask tensors. Uses TensorFlow-native transforms
+    as a fallback when Albumentations is not available.
     
     Example:
         >>> aug = SegmentationAugmentation()
@@ -90,3 +212,28 @@ class SegmentationAugmentation(tf.keras.layers.Layer):
         mask = combined[..., 3:]
         
         return image, mask
+    
+    def get_config(self):
+        config = super().get_config()
+        config.update({
+            'horizontal_flip': self.horizontal_flip,
+            'vertical_flip': self.vertical_flip,
+            'rotation_range': self.rotation_range,
+        })
+        return config
+
+
+def get_segmentation_augmentation() -> tf.keras.Sequential:
+    """
+    Create TensorFlow-native augmentation pipeline for segmentation.
+    
+    This is a simpler alternative when Albumentations is not available.
+    Note: For best results, use get_augmentation_fn() with Albumentations.
+    
+    Returns:
+        Keras Sequential model for augmentation.
+    """
+    return tf.keras.Sequential([
+        tf.keras.layers.RandomFlip("horizontal"),
+        tf.keras.layers.RandomRotation(0.1),
+    ], name="segmentation_augmentation")

@@ -1,75 +1,95 @@
 # ═══════════════════════════════════════════════════════════════════════════════
-# SEGMENTATION TRAINING CONFIGURATION
+# Brain Tumor Segmentation Configuration
 # ═══════════════════════════════════════════════════════════════════════════════
-# This file contains hyperparameters for brain tumor segmentation training.
-# NOTE: Segmentation module is a placeholder - to be implemented.
+# 
+# This configuration file controls all aspects of segmentation training.
+# Default values are optimized for the BRICS 2025 dataset.
+#
+# Usage:
+#   python scripts/train_segmentor.py --config configs/segmentation_config.yaml
+# ═══════════════════════════════════════════════════════════════════════════════
 
 # ─────────────────────────────────────────────────────────────────────────────────
-# MODEL SETTINGS
+# Model Configuration
 # ─────────────────────────────────────────────────────────────────────────────────
-# Available models (future):
-#   - UNet
-#   - UNet_ResNet (U-Net with ResNet encoder)
-#   - AttentionUNet
+model_name: "UNet"          # Options: UNet, AttentionUNet, ResUNetPP, SwinUNet
+backbone: "ResNet50"         # Backbone for encoder (ResNet50 recommended)
+weights: "imagenet"          # Pre-trained weights
+freeze_backbone: true        # Freeze backbone during training
+num_classes: 1               # 1 for binary segmentation
 
-model_name: "UNet"
+# Model-specific settings (optional)
 encoder_filters: [64, 128, 256, 512, 1024]
 dropout_rate: 0.3
-num_classes: 1  # Binary segmentation
 
 # ─────────────────────────────────────────────────────────────────────────────────
-# DATA SETTINGS
+# Data Configuration
 # ─────────────────────────────────────────────────────────────────────────────────
-img_size: [224, 224]
-batch_size: 16
-val_split: 0.2
-random_seed: 42
+img_size: [256, 256]         # Input image size [height, width]
+batch_size: 32               # Batch size (reduce if OOM errors)
 
-# Data paths (relative to project root, or absolute paths)
-train_images_dir: null  # defaults to data/brisc2025/segmentation_task/train/images
-train_masks_dir: null   # defaults to data/brisc2025/segmentation_task/train/masks
-test_images_dir: null   # defaults to data/brisc2025/segmentation_task/test/images
-test_masks_dir: null    # defaults to data/brisc2025/segmentation_task/test/masks
+data:
+  train_images_dir: "data/brisc2025/segmentation_task/train/images"
+  train_masks_dir: "data/brisc2025/segmentation_task/train/masks"
+  test_images_dir: "data/brisc2025/segmentation_task/test/images"
+  test_masks_dir: null       # Set if test masks are available
+  val_split: 0.2             # Validation split fraction
+  random_state: 42           # Seed for reproducible splits
 
 # ─────────────────────────────────────────────────────────────────────────────────
-# TRAINING SETTINGS
+# Training Configuration
 # ─────────────────────────────────────────────────────────────────────────────────
+epochs: 500
 learning_rate: 0.0001
-epochs: 200
 
-# Loss function: "dice", "bce", "bce_dice", "focal", "tversky"
-loss: "bce_dice"
+# Loss function
+# Options: dice, dice_bce, tversky, focal_tversky, bce_tversky
+loss: "bce_tversky"
+
+# Loss weights (for combined losses)
 loss_weights:
   bce: 0.5
   dice: 0.5
+  tversky: 0.5
 
 # ─────────────────────────────────────────────────────────────────────────────────
-# AUGMENTATION SETTINGS
+# Augmentation Configuration
 # ─────────────────────────────────────────────────────────────────────────────────
 augmentation:
   enabled: true
+  # Spatial transforms (applied to both image and mask)
   horizontal_flip: true
-  vertical_flip: false
-  rotation_range: 0.1
+  vertical_flip: true
+  rotation_range: 25          # degrees
+  scale_range: [0.85, 1.15]
+  # Elastic deformations
+  elastic_transform: true
+  grid_distortion: true
+  # Pixel-level transforms (image only)
+  brightness_contrast: true
+  gaussian_noise: true
+  gaussian_blur: true
+  clahe: true
 
 # ─────────────────────────────────────────────────────────────────────────────────
-# CALLBACK SETTINGS
+# Callback Configuration
 # ─────────────────────────────────────────────────────────────────────────────────
 early_stopping:
   monitor: "val_dice_coefficient"
   mode: "max"
-  patience: 30
+  patience: 50
   restore_best_weights: true
 
 reduce_lr:
   monitor: "val_loss"
   factor: 0.5
   patience: 10
+  min_lr: 0.0000001
 
 use_tensorboard: false
 
 # ─────────────────────────────────────────────────────────────────────────────────
-# OUTPUT SETTINGS
+# Output Directories
 # ─────────────────────────────────────────────────────────────────────────────────
-weights_dir: null  # defaults to weights/segmentation/
-logs_dir: null     # defaults to logs/segmentation/
+weights_dir: "weights/segmentation"
+logs_dir: "logs/segmentation"

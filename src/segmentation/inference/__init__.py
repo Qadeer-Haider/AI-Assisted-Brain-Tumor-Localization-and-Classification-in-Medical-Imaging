@@ -1,6 +1,12 @@
-"""Inference utilities for segmentation."""
+"""
+Inference components for segmentation.
 
-# Placeholder imports - to be implemented
-# from .predictor import TumorSegmentor
+Provides prediction and visualization utilities for trained segmentation models.
+"""
 
-__all__ = []
+from .predictor import TumorSegmentor, predict_mask
+
+__all__ = [
+    "TumorSegmentor",
+    "predict_mask",
+]

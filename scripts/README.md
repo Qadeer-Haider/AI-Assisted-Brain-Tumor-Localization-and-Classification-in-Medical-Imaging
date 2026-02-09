@@ -4,7 +4,7 @@ Executable Python scripts for training, evaluation, and inference.
 
 ## Available Scripts
 
-### Training
+### Classification
 
 #### `train_classifier.py`
 Train a classification model from the command line.
@@ -30,10 +30,8 @@ python scripts/train_classifier.py --config configs/classification_config.yaml
 
 ---
 
-### Evaluation
-
 #### `evaluate_classifier.py`
-Evaluate a trained model on the test set.
+Evaluate a trained classification model on the test set.
 
 **Usage**:
 ```bash
@@ -58,8 +56,6 @@ python scripts/evaluate_classifier.py --weights model.keras --save-cm confusion_
 
 ---
 
-### Inference
-
 #### `predict_single.py`
 Make predictions on a single image.
 
@@ -83,13 +79,86 @@ python scripts/predict_single.py \
 
 ---
 
-## Segmentation Scripts (Coming Soon)
+### Segmentation
 
 #### `train_segmentor.py`
-Train a segmentation model (placeholder).
+Train a segmentation model from the command line.
+
+**Usage**:
+```bash
+# Train with default configuration (UNet + BCE-Tversky)
+python scripts/train_segmentor.py
+
+# Train specific model and loss
+python scripts/train_segmentor.py --model AttentionUNet --loss bce_tversky
+
+# Train with custom config
+python scripts/train_segmentor.py --config configs/segmentation_config.yaml
+
+# Custom hyperparameters
+python scripts/train_segmentor.py \
+    --model UNet \
+    --loss focal_tversky \
+    --epochs 200 \
+    --batch-size 32 \
+    --learning-rate 0.0001
+```
+
+**Arguments**:
+- `--model`: Model architecture (UNet, AttentionUNet, ResUNetPP, SwinUNet)
+- `--loss`: Loss function (bce_tversky, dice, dice_bce, tversky, focal_tversky)
+- `--backbone`: Encoder backbone (ResNet50, default)
+- `--epochs`: Number of training epochs
+- `--batch-size`: Batch size for training
+- `--learning-rate`: Learning rate
+- `--img-size`: Input image size (default: 256)
+- `--config`: Path to YAML configuration file
+
+**Outputs**:
+- Trained model saved to `weights/segmentation/`
+- Training logs saved to `logs/segmentation/`
+- CSV training history
+
+---
 
 #### `predict_mask.py`
-Generate segmentation masks (placeholder).
+Generate segmentation masks for images.
+
+**Usage**:
+```bash
+# Predict single image with visualization
+python scripts/predict_mask.py \
+    --image data/brisc2025/segmentation_task/test/images/sample.jpg \
+    --model weights/segmentation/UNet_bce_tversky_best.keras \
+    --visualize
+
+# Predict directory of images
+python scripts/predict_mask.py \
+    --input-dir data/brisc2025/segmentation_task/test/images \
+    --model weights/segmentation/UNet_bce_tversky_best.keras \
+    --output-dir outputs/predictions
+
+# Save masks without visualization
+python scripts/predict_mask.py \
+    --image path/to/image.jpg \
+    --model weights/segmentation/UNet_bce_tversky_best.keras \
+    --output outputs/mask.png
+```
+
+**Arguments**:
+- `--image`: Path to single input image
+- `--input-dir`: Directory containing multiple images
+- `--model`: Path to trained segmentation model
+- `--output`: Output path for single mask
+- `--output-dir`: Output directory for multiple masks
+- `--visualize`: Show visualization with overlay
+- `--threshold`: Binary threshold (default: 0.5)
+- `--img-size`: Image size (default: 256)
+
+**Outputs**:
+- Predicted segmentation masks
+- Overlay visualizations (if --visualize)
+- Binary masks saved as PNG
 
 ---
 
@@ -97,13 +166,17 @@ Generate segmentation masks (placeholder).
 
 - Use `--help` flag with any script to see all available options
 - Scripts automatically create output directories if they don't exist
-- Training logs are saved to `logs/classification/`
-- Model weights are saved to `weights/classification/`
+- Classification logs are saved to `logs/classification/`
+- Segmentation logs are saved to `logs/segmentation/`
+- Classification weights are saved to `weights/classification/`
+- Segmentation weights are saved to `weights/segmentation/`
 - All scripts support YAML configuration files for reproducibility
+
+---
 
 ## Examples
 
-### Training Pipeline
+### Classification Pipeline
 ```bash
 # 1. Train model
 python scripts/train_classifier.py --model ConvNeXtBase --epochs 100
@@ -118,12 +191,82 @@ python scripts/predict_single.py \
     --weights weights/classification/ConvNeXtBase_best_weights.keras
 ```
 
-### Batch Evaluation
+### Segmentation Pipeline
 ```bash
-# Evaluate all models
+# 1. Train segmentation model
+python scripts/train_segmentor.py --model UNet --loss bce_tversky --epochs 200
+
+# 2. Predict masks for test images
+python scripts/predict_mask.py \
+    --input-dir data/brisc2025/segmentation_task/test/images \
+    --model weights/segmentation/UNet_bce_tversky_best.keras \
+    --output-dir outputs/test_predictions \
+    --visualize
+
+# 3. Predict single image with overlay
+python scripts/predict_mask.py \
+    --image path/to/mri_scan.jpg \
+    --model weights/segmentation/UNet_bce_tversky_best.keras \
+    --visualize
+```
+
+### Batch Evaluation
+
+**Classification:**
+```bash
+# Evaluate all classification models
 for model in ConvNeXtBase ResNet152V2 DenseNet201 EfficientNetV2S VGG16; do
     python scripts/evaluate_classifier.py \
         --weights weights/classification/${model}_best_weights.keras \
         --model $model
 done
+```
+
+**Segmentation:**
+```bash
+# Train multiple segmentation models with different architectures
+for model in UNet AttentionUNet ResUNetPP; do
+    python scripts/train_segmentor.py \
+        --model $model \
+        --loss bce_tversky \
+        --epochs 200
+done
+```
+
+### Experiment with Different Losses
+```bash
+# Train same model with different loss functions
+for loss in dice dice_bce tversky focal_tversky bce_tversky; do
+    python scripts/train_segmentor.py \
+        --model UNet \
+        --loss $loss \
+        --epochs 200
+done
+```
+
+---
+
+## Quick Reference
+
+| Task | Script | Primary Use |
+|------|--------|-------------|
+| Train classifier | `train_classifier.py` | Train CNN for tumor classification |
+| Evaluate classifier | `evaluate_classifier.py` | Get metrics on test set |
+| Predict class | `predict_single.py` | Single image classification |
+| Train segmentor | `train_segmentor.py` | Train U-Net for tumor segmentation |
+| Predict mask | `predict_mask.py` | Generate segmentation masks |
+
+---
+
+## Configuration Files
+
+All scripts can use YAML configuration files for consistent hyperparameters:
+
+- **Classification**: `configs/classification_config.yaml`
+- **Segmentation**: `configs/segmentation_config.yaml`
+
+Example usage:
+```bash
+python scripts/train_classifier.py --config configs/classification_config.yaml
+python scripts/train_segmentor.py --config configs/segmentation_config.yaml
 ```

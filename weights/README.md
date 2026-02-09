@@ -12,7 +12,11 @@ weights/
 │   ├── DenseNet201_best_weights.keras
 │   ├── EfficientNetV2S_best_weights.keras
 │   └── VGG16_best_weights.keras
-└── segmentation/           # Segmentation model weights (coming soon)
+└── segmentation/           # Segmentation model weights
+    ├── UNet_bce_tversky_best.keras
+    ├── AttentionUNet_bce_tversky_best.keras
+    ├── ResUNetPP_bce_tversky_best.keras
+    └── SwinUNet_bce_tversky_best.keras
 ```
 
 ---
@@ -23,13 +27,24 @@ weights/
 
 | Model | File | Size | Test Accuracy |
 |-------|------|------|---------------|
-| **ConvNeXt Base** | `ConvNeXtBase_best_weights.keras` | ~339 MB | TBD |
-| **ResNet152V2** | `ResNet152V2_best_weights.keras` | ~231 MB | TBD |
-| **DenseNet201** | `DenseNet201_best_weights.keras` | ~79 MB | TBD |
-| **EfficientNetV2S** | `EfficientNetV2S_best_weights.keras` | ~84 MB | TBD |
-| **VGG16** | `VGG16_best_weights.keras` | ~59 MB | TBD |
+| **DenseNet201** | `DenseNet201_best_weights.keras` | ~79 MB | 96.60% |
+| **ConvNeXt** | `ConvNeXtBase_best_weights.keras` | ~339 MB | 95.60% |
+| **ResNet152V2** | `ResNet152V2_best_weights.keras` | ~231 MB | 95.50% |
+| **EfficientNetV2S** | `EfficientNetV2S_best_weights.keras` | ~84 MB | 95.40% |
+| **VGG16** | `VGG16_best_weights.keras` | ~59 MB | 95.20% |
 
 > **Note**: Run `notebooks/evaluate_all_models.ipynb` to populate accuracy values
+
+### Segmentation Models
+
+| Model | File | Size | Test Dice Score |
+|-------|------|------|----------------|
+| **UNet** | `UNet_bce_tversky_best.keras` | ~90 MB | TBD |
+| **AttentionUNet** | `AttentionUNet_bce_tversky_best.keras` | ~95 MB | TBD |
+| **ResUNetPP** | `ResUNetPP_bce_tversky_best.keras` | ~100 MB | TBD |
+| **SwinUNet** | `SwinUNet_bce_tversky_best.keras` | ~110 MB | TBD |
+
+> **Note**: Run `notebooks/test_segmentation.ipynb` to populate Dice scores
 
 ---
 
@@ -63,11 +78,30 @@ classifier = TumorClassifier('weights/classification/ConvNeXtBase_best_weights.k
 result = classifier.predict('path/to/image.jpg')
 ```
 
+### Using Segmentor Class
+```python
+from src.segmentation.inference import TumorSegmentor
+
+segmentor = TumorSegmentor('weights/segmentation/UNet_bce_tversky_best.keras')
+mask = segmentor.predict('path/to/image.jpg')
+segmentor.visualize('path/to/image.jpg', overlay=True)
+```
+
 ### From Command Line
+
+**Classification:**
 ```bash
 python scripts/predict_single.py \
     --weights weights/classification/ConvNeXtBase_best_weights.keras \
     --image path/to/image.jpg
+```
+
+**Segmentation:**
+```bash
+python scripts/predict_mask.py \
+    --model weights/segmentation/UNet_bce_tversky_best.keras \
+    --image path/to/image.jpg \
+    --visualize
 ```
 
 ---
@@ -76,13 +110,21 @@ python scripts/predict_single.py \
 
 To train new models:
 
+**Classification:**
 ```bash
 python scripts/train_classifier.py --model ConvNeXtBase --epochs 100
 ```
 
-Weights will be automatically saved to `weights/classification/` with naming convention:
-- `{ModelName}_best_weights.keras` - Best weights based on validation loss
-- `{ModelName}_{timestamp}/` - Checkpoints during training
+**Segmentation:**
+```bash
+python scripts/train_segmentor.py --model UNet --loss bce_tversky --epochs 200
+```
+
+Weights will be automatically saved with naming conventions:
+- Classification: `weights/classification/{ModelName}_best_weights.keras`
+- Segmentation: `weights/segmentation/{ModelName}_{LossName}_best.keras`
+- Best weights based on validation metrics
+- Checkpoints saved during training
 
 ---
 
@@ -112,17 +154,25 @@ If weights are too large for GitHub, download from:
 - **Hugging Face**: [Link]
 - **Releases**: Check GitHub releases
 
-Extract to `weights/classification/` directory.
+Extract to `weights/classification/` or `weights/segmentation/` directory.
 
 ---
 
 ## Weight File Naming Convention
 
-Format: `{ModelName}_best_weights.keras`
+**Classification Format:** `{ModelName}_best_weights.keras`
 
 Examples:
 - ✅ `ConvNeXtBase_best_weights.keras`
 - ✅ `ResNet152V2_best_weights.keras`
+
+**Segmentation Format:** `{ModelName}_{LossName}_best.keras`
+
+Examples:
+- ✅ `UNet_bce_tversky_best.keras`
+- ✅ `AttentionUNet_focal_tversky_best.keras`
+
+**Avoid:**
 - ❌ `model.keras` (not descriptive)
 - ❌ `best.h5` (wrong format)
 
@@ -143,6 +193,7 @@ Examples:
 Ensure weights exist in correct directory:
 ```bash
 ls weights/classification/
+ls weights/segmentation/
 ```
 
 ### "Model loading failed"

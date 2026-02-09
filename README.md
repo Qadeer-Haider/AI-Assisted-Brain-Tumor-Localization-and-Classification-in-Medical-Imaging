@@ -6,7 +6,6 @@
 ![TensorFlow](https://img.shields.io/badge/TensorFlow-2.10%2B-orange?logo=tensorflow&logoColor=white)
 ![License](https://img.shields.io/badge/License-MIT-green)
 ![Status](https://img.shields.io/badge/Status-Active-success)
-![Phase](https://img.shields.io/badge/Phase-1_Classification-blueviolet)
 
 **A deep learning framework for brain tumor detection and localization using MRI images**
 
@@ -18,22 +17,23 @@
 
 ## 📋 Overview
 
-This project is a comprehensive deep learning solution for medical imaging analysis, designed to assist in the automated detection of brain tumors.
+This project is a comprehensive deep learning solution for medical imaging analysis, designed to assist in automated brain tumor detection and localization.
 
-### 🔬 Current Focus (Phase 1): Classification
+### ✅ Phase 1: Classification 
 - **Robust Classification**: Classifying MRI slices into 4 categories: **Glioma**, **Meningioma**, **Pituitary**, and **No Tumor**.
-- **Advanced Architectures**: Utilizing transfer learning with ConvNeXt, EfficientNetV2, etc.
-- **Medical Metrics**: Implementing rigorous evaluation suitable for diagnosis support.
+- **Advanced Architectures**: Transfer learning with ConvNeXt, EfficientNetV2, ResNet, DenseNet, and VGG.
+- **Medical Metrics**: Rigorous evaluation optimized for medical diagnosis support.
 
-### 🔭 Future Focus (Phase 2): Segmentation *(Coming Soon)*
-- **Tumor Localization**: Pixel-wise localization of tumor regions to assist in surgical planning.
-- **Mask Generation**: Precise boundary detection.
+### ✅ Phase 2: Segmentation 
+- **Tumor Localization**: Pixel-wise localization of tumor regions using U-Net variants.
+- **Multiple Architectures**: UNet, AttentionUNet, ResUNetPP, SwinUNet with ResNet50 backbone.
+- **Advanced Loss Functions**: BCE-Tversky, Focal Tversky, Dice, and combined losses.
 
 ---
 
 ## ✨ Features
 
-### ✅ Classification (Current)
+### ✅ Classification 
 - 🏗️ **Multiple Architectures**: ResNet, DenseNet, VGG, EfficientNetV2, ConvNeXt.
 - 🔧 **Modular Design**: Production-ready codebase offering easy extensibility.
 - ⚙️ **YAML Configuration**: Centralized hyperparameter management.
@@ -41,10 +41,13 @@ This project is a comprehensive deep learning solution for medical imaging analy
 - 📈 **Class Balancing**: Automatic weight computation for imbalanced datasets.
 - 🎨 **Visualizations**: Comprehensive performance plots (AUC, Confusion Matrices).
 
-### 🚧 Segmentation (Upcoming)
-- 🧩 **U-Net Integration**: Implementation of U-Net and Attention U-Net.
-- 🎯 **Mask Generation**: Precise tumor boundary detection.
-- 📐 **Dice Coefficient**: Advanced segmentation evaluation metrics.
+### ✅ Segmentation 
+- 🧩 **Multiple Architectures**: UNet, AttentionUNet, ResUNetPP, SwinUNet with ResNet50 backbone.
+- 🎯 **Mask Generation**: Precise tumor boundary detection with visualization.
+- ⚙️ **YAML Configuration**: Centralized hyperparameter management.
+- 📐 **Medical Metrics**: Dice, IoU, Sensitivity, Specificity, Precision.
+- 🔥 **Advanced Losses**: BCE-Tversky (default), Dice, Focal Tversky, and more.
+- 🎨 **Albumentations**: Advanced data augmentation for segmentation.
 
 ---
 
@@ -57,21 +60,23 @@ AI-Assisted-Brain-Tumor-Localization-and-Classification/
 │   └── segmentation_config.yaml
 ├── data/                       # Dataset directory
 │   └── brisc2025/
-│       ├── classification_task/ # Current active dataset
-│       └── segmentation_task/
+│       ├── classification_task/ # Classification dataset
+│       └── segmentation_task/   # Segmentation dataset
 ├── notebooks/                  # Jupyter notebooks
 │   ├── evaluate_all_models.ipynb
 │   ├── train_classification.ipynb
-│   └── test_classification.ipynb
+│   ├── test_classification.ipynb
+│   ├── train_segmentation.ipynb
+│   └── test_segmentation.ipynb
 ├── scripts/                    # Executable training/inference scripts
 │   ├── train_classifier.py
 │   ├── evaluate_classifier.py
 │   ├── predict_single.py
-│   ├── train_segmentor.py      # (Pending)
-│   └── predict_mask.py         # (Pending)
+│   ├── train_segmentor.py
+│   └── predict_mask.py
 ├── src/                        # Main source package
-│   ├── classification/         # Classification module (Complete)
-│   ├── segmentation/           # Segmentation module (In Progress)
+│   ├── classification/         # Classification module 
+│   ├── segmentation/           # Segmentation module 
 │   └── utils/                  # Shared utilities
 ├── weights/                    # Saved model weights
 ├── logs/                       # Training logs
@@ -108,9 +113,11 @@ pip install -e .
 
 ---
 
-## 💻 Usage (Classification)
+## 💻 Usage
 
-### Training
+### Classification
+
+#### Training
 
 ```bash
 # Train with default configuration (ConvNeXt)
@@ -120,14 +127,14 @@ python scripts/train_classifier.py
 python scripts/train_classifier.py --model ResNet152V2 --epochs 100
 ```
 
-### Evaluation
+#### Evaluation
 
 ```bash
 # Evaluate trained model
 python scripts/evaluate_classifier.py --weights weights/classification/ConvNeXt_best_weights.keras
 ```
 
-### Prediction
+#### Prediction
 
 ```bash
 # Predict single image
@@ -136,9 +143,45 @@ python scripts/predict_single.py \
     --weights weights/classification/ConvNeXt_best_weights.keras
 ```
 
+### Segmentation
+
+#### Training
+
+```bash
+# Train with Jupyter notebook (recommended)
+jupyter notebook notebooks/train_segmentation.ipynb
+
+# Or use CLI with default configuration (UNet + BCE-Tversky)
+python scripts/train_segmentor.py
+
+# Train specific model
+python scripts/train_segmentor.py --model AttentionUNet --loss bce_tversky
+
+# Train with config file
+python scripts/train_segmentor.py --config configs/segmentation_config.yaml
+```
+
+#### Prediction
+
+```bash
+# Predict single image
+python scripts/predict_mask.py \
+    --image data/brisc2025/segmentation_task/test/images/sample.jpg \
+    --model weights/segmentation/UNet_bce_tversky_best.keras \
+    --visualize
+
+# Predict directory of images
+python scripts/predict_mask.py \
+    --input-dir data/brisc2025/segmentation_task/test/images \
+    --model weights/segmentation/UNet_bce_tversky_best.keras \
+    --output-dir outputs/predictions
+```
+
 ---
 
-## 🏗️ Classification Models
+## 🏗️ Models
+
+### Classification Models
 
 We leverage state-of-the-art architectures initialized with ImageNet weights and fine-tuned for medical imaging:
 
@@ -150,27 +193,56 @@ We leverage state-of-the-art architectures initialized with ImageNet weights and
 | **DenseNet201** | ~18M | Feature reuse & efficiency |
 | **VGG16** | ~14M | Classic baseline |
 
+### Segmentation Models
+
+We use **keras-unet-collection** for advanced segmentation architectures:
+
+| Model | Description | Best Use Case |
+| :--- | :--- | :--- |
+| **UNet** | Standard U-Net with ResNet50 backbone | General segmentation |
+| **AttentionUNet** | U-Net with attention gates | Fine boundary detection |
+| **ResUNetPP** | Residual U-Net with ASPP | Multi-scale features |
+| **SwinUNet** | Transformer-based segmentation | State-of-the-art |
+
+#### Loss Functions
+
+| Loss | Description |
+| :--- | :--- |
+| **bce_tversky** (default) | BCE + Tversky combined - balanced and robust |
+| **dice** | Dice loss - direct optimization of Dice score |
+| **dice_bce** | Dice + BCE - pixel and region optimization |
+| **tversky** | Tversky loss - adjustable FP/FN penalties |
+| **focal_tversky** | Focal Tversky - focus on hard regions |
+
 ---
 
-## 📊 Dataset (Classification Task)
+## 📊 Dataset
 
-This project uses the **BRISC2025** (Brain Tumor Image Segmentation & Classification) dataset.
+This project uses the **BRISC2025** (Brain Tumor Image Segmentation & Classification) dataset, which includes both classification and segmentation tasks.
 
-> **Note:** We are currently utilizing the **Classification subset** of this dataset.
-
+### Classification Dataset
 - **6,000** T1-weighted MRI slices (5,000 train / 1,000 test)
 - **4 classes**: Glioma, Meningioma, Pituitary Tumor, No Tumor
 - **3 anatomical planes**: Axial, Coronal, Sagittal
 
-### 🔄 Data Splitting Strategy (Classification)
+### 🔄 Data Splitting Strategy
 
-To ensure robust evaluation for our **classification models** and prevent data leakage, we utilize a **Stratified Shuffle Split** technique:
+To ensure robust evaluation and prevent data leakage, we utilize **Stratified Splitting** techniques:
+
+**For Classification:**
 
 1.  **Stratification Method**: Data is stratified based on *both* **Tumor Class** and **Anatomical Plane** (Axial, Coronal, Sagittal). This ensures that every subset of data preserves the original distribution of tumor types and viewing angles.
 2.  **Split Ratios**:
-    - **Train**: 80% (Optimization)
+    - **Train**: 80% (Model optimization)
     - **Validation**: 20% (Hyperparameter tuning & early stopping)
     - **Test**: Separate hold-out set (~1,000 images)
+
+**For Segmentation:**
+1.  **Stratification Method**: Image-mask pairs are stratified based on **Tumor Class** and **Anatomical Plane** (similar to classification) to ensure balanced representation and prevent data leakage.
+2.  **Split Ratios**:
+    - **Train**: 80% (Model optimization)
+    - **Validation**: 20% (Hyperparameter tuning & early stopping)
+    - **Test**: Separate hold-out set
 
 ### Citation
 
@@ -187,7 +259,7 @@ To ensure robust evaluation for our **classification models** and prevent data l
 
 ## 🔍 Performance Visualization
 
-Here are the comparative results of our trained models. **ConvNeXtBase** and **EfficientNetV2S** demonstrated superior performance across key metrics.
+Here are the comparative results of our trained models. **DenseNet201** and **ConvNeXt** demonstrated superior performance across key metrics.
 
 ### 🏆 Comprehensive Model Evaluation
 ![Comprehensive Evaluation](logs/classification/comprehensive_evaluation_results.png)
@@ -260,11 +332,12 @@ Test set performance on **1,000 T1-weighted MRI slices** from the BRISC2025 data
     - [x] Model Implementation (ConvNeXt, EfficientNet, etc.)
     - [x] Training Pipeline & Logging
     - [x] Evaluation & Visualization
-- [ ] **Phase 2: Segmentation**
-    - [ ] U-Net Architecture Implementation
-    - [ ] Mask Data Processing
-    - [ ] Segmentation Training Loop
-    - [ ] Mask Prediction Visualization
+- [x] **Phase 2: Segmentation**
+    - [x] U-Net Architecture Implementation (UNet, AttentionUNet, ResUNetPP, SwinUNet)
+    - [x] Mask Data Processing with Albumentations
+    - [x] Segmentation Training Loop with Advanced Losses
+    - [x] Mask Prediction & Visualization
+    - [x] Modular Codebase Structure
 - [ ] **Phase 3: Deployment**
     - [ ] Web Interface (Streamlit)
     - [ ] Docker Containerization

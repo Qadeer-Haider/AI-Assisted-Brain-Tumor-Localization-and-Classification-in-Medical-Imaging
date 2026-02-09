@@ -1,15 +1,21 @@
 """
 Loss functions for segmentation.
 
-Provides Dice loss, BCE loss, and combined losses for
+Provides Dice loss, BCE loss, Tversky loss, and combined losses for
 binary segmentation tasks.
 """
 
 import tensorflow as tf
 from tensorflow.keras import backend as K
 
+try:
+    from keras_unet_collection import losses as kuc_losses
+    KUC_LOSSES_AVAILABLE = True
+except ImportError:
+    KUC_LOSSES_AVAILABLE = False
 
-def dice_coefficient(y_true: tf.Tensor, y_pred: tf.Tensor, smooth: float = 1.0) -> tf.Tensor:
+
+def dice_coefficient(y_true: tf.Tensor, y_pred: tf.Tensor, smooth: float = 1e-6) -> tf.Tensor:
     """
     Compute Dice coefficient (F1 score for segmentation).
     
@@ -45,10 +51,12 @@ def dice_loss(y_true: tf.Tensor, y_pred: tf.Tensor) -> tf.Tensor:
     Returns:
         Dice loss (0 to 1, lower is better).
     """
+    if KUC_LOSSES_AVAILABLE:
+        return kuc_losses.dice(y_true, y_pred)
     return 1.0 - dice_coefficient(y_true, y_pred)
 
 
-def bce_dice_loss(
+def dice_bce_loss(
     y_true: tf.Tensor,
     y_pred: tf.Tensor,
     bce_weight: float = 0.5,
@@ -73,9 +81,108 @@ def bce_dice_loss(
     bce = tf.keras.losses.binary_crossentropy(y_true, y_pred)
     bce = K.mean(bce)
     
-    dice = dice_loss(y_true, y_pred)
+    if KUC_LOSSES_AVAILABLE:
+        dice = kuc_losses.dice(y_true, y_pred)
+    else:
+        dice = dice_loss(y_true, y_pred)
     
     return bce_weight * bce + dice_weight * dice
+
+
+def tversky_loss(
+    y_true: tf.Tensor,
+    y_pred: tf.Tensor,
+    alpha: float = 0.7,
+    beta: float = 0.3,
+    smooth: float = 1e-6,
+) -> tf.Tensor:
+    """
+    Tversky loss for imbalanced segmentation.
+    
+    Generalizes Dice loss with adjustable FP/FN penalties.
+    alpha > beta: penalize false negatives more (good for tumor detection)
+    
+    Args:
+        y_true: Ground truth mask.
+        y_pred: Predicted mask.
+        alpha: Weight for false positives.
+        beta: Weight for false negatives.
+        smooth: Smoothing factor.
+        
+    Returns:
+        Tversky loss.
+    """
+    if KUC_LOSSES_AVAILABLE:
+        return kuc_losses.tversky(y_true, y_pred)
+    
+    y_true_flat = K.flatten(y_true)
+    y_pred_flat = K.flatten(y_pred)
+    
+    true_pos = K.sum(y_true_flat * y_pred_flat)
+    false_neg = K.sum(y_true_flat * (1 - y_pred_flat))
+    false_pos = K.sum((1 - y_true_flat) * y_pred_flat)
+    
+    tversky_index = (true_pos + smooth) / (
+        true_pos + alpha * false_pos + beta * false_neg + smooth
+    )
+    
+    return 1.0 - tversky_index
+
+
+def focal_tversky_loss(
+    y_true: tf.Tensor,
+    y_pred: tf.Tensor,
+    gamma: float = 0.75,
+) -> tf.Tensor:
+    """
+    Focal Tversky loss for hard regions focus.
+    
+    Applies focal weighting to Tversky loss to focus on difficult regions.
+    
+    Args:
+        y_true: Ground truth mask.
+        y_pred: Predicted mask.
+        gamma: Focal parameter.
+        
+    Returns:
+        Focal Tversky loss.
+    """
+    if KUC_LOSSES_AVAILABLE:
+        return kuc_losses.focal_tversky(y_true, y_pred)
+    
+    tversky = tversky_loss(y_true, y_pred)
+    return K.pow(tversky, gamma)
+
+
+def bce_tversky_loss(
+    y_true: tf.Tensor,
+    y_pred: tf.Tensor,
+    bce_weight: float = 0.5,
+    tversky_weight: float = 0.5,
+) -> tf.Tensor:
+    """
+    BCE + Tversky combined loss (DEFAULT - balanced and robust).
+    
+    Combines the stability of BCE with the region-awareness of Tversky.
+    
+    Args:
+        y_true: Ground truth mask.
+        y_pred: Predicted mask.
+        bce_weight: Weight for BCE loss.
+        tversky_weight: Weight for Tversky loss.
+        
+    Returns:
+        Combined loss.
+    """
+    bce = tf.keras.losses.binary_crossentropy(y_true, y_pred)
+    bce = K.mean(bce)
+    
+    if KUC_LOSSES_AVAILABLE:
+        tversky = kuc_losses.tversky(y_true, y_pred)
+    else:
+        tversky = tversky_loss(y_true, y_pred)
+    
+    return bce_weight * bce + tversky_weight * tversky
 
 
 def focal_loss(
@@ -116,38 +223,34 @@ def focal_loss(
     return K.mean(focal)
 
 
-def tversky_loss(
-    y_true: tf.Tensor,
-    y_pred: tf.Tensor,
-    alpha: float = 0.7,
-    beta: float = 0.3,
-    smooth: float = 1.0,
-) -> tf.Tensor:
+# Loss function registry
+LOSS_FUNCTIONS = {
+    "dice": dice_loss,
+    "dice_bce": dice_bce_loss,
+    "tversky": tversky_loss,
+    "focal_tversky": focal_tversky_loss,
+    "bce_tversky": bce_tversky_loss,
+    "focal": focal_loss,
+}
+
+
+def get_loss_function(loss_name: str):
     """
-    Tversky loss for imbalanced segmentation.
-    
-    Generalizes Dice loss with adjustable FP/FN penalties.
-    alpha > beta: penalize false negatives more (good for tumor detection)
+    Get a loss function by name.
     
     Args:
-        y_true: Ground truth mask.
-        y_pred: Predicted mask.
-        alpha: Weight for false positives.
-        beta: Weight for false negatives.
-        smooth: Smoothing factor.
-        
+        loss_name: Name of the loss function.
+            Options: "dice", "dice_bce", "tversky", "focal_tversky", "bce_tversky", "focal"
+            
     Returns:
-        Tversky loss.
+        Loss function.
+        
+    Raises:
+        ValueError: If loss_name is not recognized.
     """
-    y_true_flat = K.flatten(y_true)
-    y_pred_flat = K.flatten(y_pred)
-    
-    true_pos = K.sum(y_true_flat * y_pred_flat)
-    false_neg = K.sum(y_true_flat * (1 - y_pred_flat))
-    false_pos = K.sum((1 - y_true_flat) * y_pred_flat)
-    
-    tversky_index = (true_pos + smooth) / (
-        true_pos + alpha * false_pos + beta * false_neg + smooth
-    )
-    
-    return 1.0 - tversky_index
+    if loss_name not in LOSS_FUNCTIONS:
+        raise ValueError(
+            f"Unknown loss: {loss_name}. "
+            f"Available losses: {list(LOSS_FUNCTIONS.keys())}"
+        )
+    return LOSS_FUNCTIONS[loss_name]
