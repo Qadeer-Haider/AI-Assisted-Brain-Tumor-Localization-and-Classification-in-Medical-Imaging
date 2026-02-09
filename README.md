@@ -9,7 +9,7 @@
 
 **A deep learning framework for brain tumor detection and localization using MRI images**
 
-[Features](#-features) • [Installation](#-installation) • [Usage](#-usage) • [Models](#-models) • [Dataset](#-dataset) • [Results](#-results)
+[Features](#-features) • [Installation](#-installation) • [Usage](#-usage) • [Models](#️-models) • [Dataset](#-dataset) • [Results](#-results)
 
 </div>
 
@@ -359,8 +359,3 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ---
 
-<div align="center">
-
-**Built with ❤️ by [Qadeer Haider](https://github.com/Qadeer-Haider)**
-
-</div>
