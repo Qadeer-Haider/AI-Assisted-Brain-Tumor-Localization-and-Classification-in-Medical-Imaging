@@ -162,6 +162,23 @@ python scripts/predict_mask.py \
 
 ---
 
+### Deployment
+
+#### `convert_models_to_onnx.py`
+Convert all trained `.keras` classification and segmentation models to ONNX format for efficient deployment.
+
+**Usage**:
+```bash
+# Automatically converts all models found in weights/{task} to weights/onnx/{task}
+python scripts/convert_models_to_onnx.py
+```
+
+**Outputs**:
+- Converted models saved to `weights/onnx/classification/`
+- Converted models saved to `weights/onnx/segmentation/`
+
+---
+
 ## Tips
 
 - Use `--help` flag with any script to see all available options
@@ -255,6 +272,7 @@ done
 | Predict class | `predict_single.py` | Single image classification |
 | Train segmentor | `train_segmentor.py` | Train U-Net for tumor segmentation |
 | Predict mask | `predict_mask.py` | Generate segmentation masks |
+| Convert to ONNX | `convert_models_to_onnx.py` | Convert Keras models to ONNX |
 
 ---
 

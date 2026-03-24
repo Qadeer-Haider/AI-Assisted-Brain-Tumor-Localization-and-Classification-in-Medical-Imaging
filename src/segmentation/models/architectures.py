@@ -7,6 +7,7 @@ with configurable backbones and settings.
 
 from typing import Optional, Tuple
 
+from tensorflow import keras
 import tensorflow as tf
 
 try:
@@ -14,7 +15,7 @@ try:
     KERAS_UNET_AVAILABLE = True
 except ImportError:
     KERAS_UNET_AVAILABLE = False
-    print("⚠️ keras-unet-collection not installed. Please install with: pip install keras-unet-collection")
+    print("[WARNING] keras-unet-collection not installed. Please install with: pip install keras-unet-collection")
 
 
 def build_unet(
@@ -25,7 +26,7 @@ def build_unet(
     weights: str = "imagenet",
     freeze_backbone: bool = True,
     freeze_batch_norm: bool = True,
-) -> tf.keras.Model:
+) -> keras.Model:
     """
     Build standard U-Net with pre-trained backbone.
     
@@ -75,7 +76,7 @@ def build_attention_unet(
     weights: str = "imagenet",
     freeze_backbone: bool = True,
     freeze_batch_norm: bool = True,
-) -> tf.keras.Model:
+) -> keras.Model:
     """
     Build Attention U-Net with pre-trained backbone.
     
@@ -128,7 +129,7 @@ def build_resunet_pp(
     dilation_num: Tuple[int, ...] = (1, 3, 15, 31),
     aspp_num_down: int = 256,
     aspp_num_up: int = 128,
-) -> tf.keras.Model:
+) -> keras.Model:
     """
     Build ResUNet++ architecture.
     
@@ -179,7 +180,7 @@ def build_swin_unet(
     num_heads: Tuple[int, ...] = (4, 8, 8, 8),
     window_size: Tuple[int, ...] = (4, 2, 2, 2),
     num_mlp: int = 512,
-) -> tf.keras.Model:
+) -> keras.Model:
     """
     Build Swin-UNet architecture.
     

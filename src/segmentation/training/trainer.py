@@ -7,6 +7,7 @@ Provides a high-level training interface for brain tumor segmentation.
 from pathlib import Path
 from typing import Any, Dict, Optional, Tuple
 
+from tensorflow import keras
 import tensorflow as tf
 
 from ..data import create_segmentation_datasets
@@ -84,8 +85,8 @@ class SegmentationTrainer:
         self.freeze_backbone = freeze_backbone
         self.config = config or {}
         
-        self.model: Optional[tf.keras.Model] = None
-        self.history: Optional[tf.keras.callbacks.History] = None
+        self.model: Optional[keras.Model] = None
+        self.history: Optional[keras.callbacks.History] = None
         self.train_ds: Optional[tf.data.Dataset] = None
         self.val_ds: Optional[tf.data.Dataset] = None
         self.test_ds: Optional[tf.data.Dataset] = None
@@ -128,7 +129,7 @@ class SegmentationTrainer:
         
         print("✅ Datasets prepared successfully!")
     
-    def build(self) -> tf.keras.Model:
+    def build(self) -> keras.Model:
         """
         Build the segmentation model.
         
@@ -149,7 +150,7 @@ class SegmentationTrainer:
     
     def compile(
         self,
-        optimizer: Optional[tf.keras.optimizers.Optimizer] = None,
+        optimizer: Optional[keras.optimizers.Optimizer] = None,
         metrics: Optional[list] = None,
     ):
         """
@@ -163,7 +164,7 @@ class SegmentationTrainer:
             raise ValueError("Model not built. Call build() first.")
         
         if optimizer is None:
-            optimizer = tf.keras.optimizers.Adam(learning_rate=self.learning_rate)
+            optimizer = keras.optimizers.Adam(learning_rate=self.learning_rate)
         
         if metrics is None:
             metrics = get_segmentation_metrics()
@@ -185,7 +186,7 @@ class SegmentationTrainer:
         callbacks: Optional[list] = None,
         weights_dir: str = "weights/segmentation",
         logs_dir: str = "logs/segmentation",
-    ) -> tf.keras.callbacks.History:
+    ) -> keras.callbacks.History:
         """
         Train the model.
         
@@ -274,7 +275,7 @@ class SegmentationTrainer:
         self.model.save(path)
         print(f"💾 Model saved to: {path}")
     
-    def load(self, path: str) -> tf.keras.Model:
+    def load(self, path: str) -> keras.Model:
         """
         Load a saved model.
         
@@ -310,7 +311,7 @@ class SegmentationTrainer:
         from .losses import LOSS_FUNCTIONS
         custom_objects.update(LOSS_FUNCTIONS)
         
-        self.model = tf.keras.models.load_model(path, custom_objects=custom_objects)
+        self.model = keras.models.load_model(path, custom_objects=custom_objects)
         print(f"📂 Model loaded from: {path}")
         
         return self.model
@@ -327,7 +328,7 @@ def train_segmentation_model(
     test_images_dir: Optional[str] = "data/brisc2025/segmentation_task/test/images",
     test_masks_dir: Optional[str] = "data/brisc2025/segmentation_task/test/masks",
     **kwargs,
-) -> Tuple[tf.keras.Model, tf.keras.callbacks.History]:
+) -> Tuple[keras.Model, keras.callbacks.History]:
     """
     Convenience function to train a segmentation model.
     

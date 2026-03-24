@@ -8,6 +8,7 @@ early stopping, learning rate scheduling, and logging.
 from pathlib import Path
 from typing import List, Optional
 
+from tensorflow import keras
 import tensorflow as tf
 from tensorflow.keras.callbacks import (
     CSVLogger,
@@ -29,7 +30,7 @@ def get_callbacks(
     min_lr: float = 1e-7,
     use_tensorboard: bool = False,
     tensorboard_log_dir: Optional[str] = None,
-) -> List[tf.keras.callbacks.Callback]:
+) -> List[keras.callbacks.Callback]:
     """
     Create training callbacks for segmentation.
     
@@ -106,7 +107,7 @@ def get_callbacks(
     return callbacks
 
 
-def get_callbacks_from_config(config: dict, model_name: str, loss_name: str) -> List[tf.keras.callbacks.Callback]:
+def get_callbacks_from_config(config: dict, model_name: str, loss_name: str) -> List[keras.callbacks.Callback]:
     """
     Create callbacks from a configuration dictionary.
     

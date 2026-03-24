@@ -49,12 +49,22 @@ This project is a comprehensive deep learning solution for medical imaging analy
 - 🔥 **Advanced Losses**: BCE-Tversky (default), Dice, Focal Tversky, and more.
 - 🎨 **Albumentations**: Advanced data augmentation for segmentation.
 
+### 🚀 Deployment (Phase 3)
+- 🌐 **Web Interface**: Interactive Streamlit application for model inference.
+- 🐳 **Dockerization**: Containerized application for easy deployment.
+- 🔄 **ONNX Export**: Script to convert Keras models to ONNX format for optimized inference.
+
 ---
 
 ## 📁 Project Structure
 
 ```text
 AI-Assisted-Brain-Tumor-Localization-and-Classification/
+├── app/                        # Streamlit web application
+│   ├── app.py                  # Main UI
+│   ├── utils.py                # Inference utilities
+│   ├── requirements.txt        # App dependencies
+│   └── Dockerfile              # Docker configuration
 ├── configs/                    # YAML configuration files
 │   ├── classification_config.yaml
 │   └── segmentation_config.yaml
@@ -114,6 +124,33 @@ pip install -e .
 ---
 
 ## 💻 Usage
+
+### 🚀 Deployment
+
+#### Streamlit Web App
+You can run the interactive web application locally or using Docker.
+
+**Running Locally:**
+```bash
+cd app
+pip install -r requirements.txt
+streamlit run app.py
+```
+*Note: Make sure you have downloaded the ONNX model weights to `weights/onnx/` before running the app.*
+
+**Running with Docker:**
+```bash
+docker build -t brain-tumor-app ./app
+docker run -p 8501:8501 brain-tumor-app
+```
+
+#### ONNX Conversion
+Convert trained `.keras` models to ONNX format:
+```bash
+python scripts/convert_models_to_onnx.py
+```
+
+---
 
 ### Classification
 
@@ -355,10 +392,10 @@ Test set performance on **1,000 T1-weighted MRI slices** from the BRISC2025 data
     - [x] Segmentation Training Loop with Advanced Losses
     - [x] Mask Prediction & Visualization
     - [x] Modular Codebase Structure
-- [ ] **Phase 3: Deployment**
-    - [ ] Web Interface (Streamlit)
-    - [ ] Docker Containerization
-    - [ ] ONNX Export
+- [x] **Phase 3: Deployment**
+    - [x] Web Interface (Streamlit)
+    - [x] Docker Containerization
+    - [x] ONNX Export
 
 ---
 

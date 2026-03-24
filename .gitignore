@@ -41,6 +41,7 @@ weights/classification/*.keras
 weights/classification/*.h5
 weights/segmentation/*.keras
 weights/segmentation/*.h5
+weights/onnx/
 *.pth
 *.pt
 *.onnx

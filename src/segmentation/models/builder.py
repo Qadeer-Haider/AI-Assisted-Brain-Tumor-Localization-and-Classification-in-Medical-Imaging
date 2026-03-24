@@ -6,6 +6,7 @@ Factory function that creates segmentation models using keras-unet-collection.
 
 from typing import Dict, Optional, Tuple
 
+from tensorflow import keras
 import tensorflow as tf
 
 from ...utils.constants import INPUT_SHAPE
@@ -35,7 +36,7 @@ def build_segmentation_model(
     weights: str = "imagenet",
     freeze_backbone: bool = True,
     **kwargs,
-) -> tf.keras.Model:
+) -> keras.Model:
     """
     Build a segmentation model.
     
@@ -105,7 +106,7 @@ def build_segmentation_model(
     return model
 
 
-def build_model_from_config(config: Dict) -> tf.keras.Model:
+def build_model_from_config(config: Dict) -> keras.Model:
     """
     Build a segmentation model from a configuration dictionary.
     

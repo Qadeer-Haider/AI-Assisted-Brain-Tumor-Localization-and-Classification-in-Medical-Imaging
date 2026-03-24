@@ -5,8 +5,9 @@ Provides Dice coefficient, IoU, sensitivity, specificity, precision,
 and loss functions as metrics for tracking during training.
 """
 
-import tensorflow as tf
+from tensorflow import keras
 from tensorflow.keras import backend as K
+import tensorflow as tf
 
 try:
     from keras_unet_collection import losses as kuc_losses
@@ -160,7 +161,7 @@ def focal_tversky_loss_metric(y_true: tf.Tensor, y_pred: tf.Tensor) -> tf.Tensor
 
 def dice_bce_loss_metric(y_true: tf.Tensor, y_pred: tf.Tensor) -> tf.Tensor:
     """Dice + BCE combined loss as metric."""
-    bce = tf.keras.losses.binary_crossentropy(y_true, y_pred)
+    bce = keras.losses.binary_crossentropy(y_true, y_pred)
     bce = K.mean(bce)
     
     if KUC_LOSSES_AVAILABLE:
@@ -173,7 +174,7 @@ def dice_bce_loss_metric(y_true: tf.Tensor, y_pred: tf.Tensor) -> tf.Tensor:
 
 def bce_tversky_loss_metric(y_true: tf.Tensor, y_pred: tf.Tensor) -> tf.Tensor:
     """BCE + Tversky combined loss as metric."""
-    bce = tf.keras.losses.binary_crossentropy(y_true, y_pred)
+    bce = keras.losses.binary_crossentropy(y_true, y_pred)
     bce = K.mean(bce)
     
     if KUC_LOSSES_AVAILABLE:

@@ -5,8 +5,9 @@ Provides Dice loss, BCE loss, Tversky loss, and combined losses for
 binary segmentation tasks.
 """
 
-import tensorflow as tf
+from tensorflow import keras
 from tensorflow.keras import backend as K
+import tensorflow as tf
 
 try:
     from keras_unet_collection import losses as kuc_losses
@@ -78,7 +79,7 @@ def dice_bce_loss(
     Returns:
         Combined loss.
     """
-    bce = tf.keras.losses.binary_crossentropy(y_true, y_pred)
+    bce = keras.losses.binary_crossentropy(y_true, y_pred)
     bce = K.mean(bce)
     
     if KUC_LOSSES_AVAILABLE:
@@ -174,7 +175,7 @@ def bce_tversky_loss(
     Returns:
         Combined loss.
     """
-    bce = tf.keras.losses.binary_crossentropy(y_true, y_pred)
+    bce = keras.losses.binary_crossentropy(y_true, y_pred)
     bce = K.mean(bce)
     
     if KUC_LOSSES_AVAILABLE:

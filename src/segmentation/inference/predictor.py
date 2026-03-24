@@ -8,8 +8,8 @@ from pathlib import Path
 from typing import Optional, Tuple, Union
 
 import numpy as np
+from tensorflow import keras
 import tensorflow as tf
-
 
 class TumorSegmentor:
     """
@@ -27,7 +27,7 @@ class TumorSegmentor:
     def __init__(
         self,
         model_path: Optional[str] = None,
-        model: Optional[tf.keras.Model] = None,
+        model: Optional[keras.Model] = None,
         img_size: Tuple[int, int] = (256, 256),
         threshold: float = 0.5,
     ):
@@ -50,7 +50,7 @@ class TumorSegmentor:
         else:
             self.model = None
     
-    def load_model(self, model_path: str) -> tf.keras.Model:
+    def load_model(self, model_path: str) -> keras.Model:
         """
         Load a trained segmentation model.
         
@@ -90,7 +90,7 @@ class TumorSegmentor:
         except ImportError:
             pass
         
-        self.model = tf.keras.models.load_model(model_path, custom_objects=custom_objects)
+        self.model = keras.models.load_model(model_path, custom_objects=custom_objects)
         print(f"✅ Model loaded from: {model_path}")
         
         return self.model

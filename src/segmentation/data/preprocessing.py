@@ -8,6 +8,7 @@ identical spatial transformations to both images and masks.
 from typing import Callable, Tuple
 
 import numpy as np
+from tensorflow import keras
 import tensorflow as tf
 
 try:
@@ -15,7 +16,7 @@ try:
     ALBUMENTATIONS_AVAILABLE = True
 except ImportError:
     ALBUMENTATIONS_AVAILABLE = False
-    print("⚠️ Albumentations not installed. Augmentation will be disabled.")
+    print("[WARNING] Albumentations not installed. Augmentation will be disabled.")
 
 
 def get_training_augmentation() -> "albu.Compose":
@@ -41,36 +42,18 @@ def get_training_augmentation() -> "albu.Compose":
         # Spatial transforms (applied to both image and mask)
         albu.HorizontalFlip(p=0.5),
         albu.VerticalFlip(p=0.3),
-        albu.Affine(
-            scale=(0.85, 1.15),
-            translate_percent=(-0.1, 0.1),
-            rotate=(-25, 25),
-            p=0.7
-        ),
+        albu.Affine(scale=(0.85, 1.15), translate_percent=(-0.1, 0.1), rotate=(-10, 10), p=0.5),
         
         # Elastic/distortion transforms (applied to both image and mask)
-        albu.ElasticTransform(alpha=1, sigma=50, p=0.3),
-        albu.GridDistortion(p=0.3),
-        albu.OpticalDistortion(distort_limit=0.1, p=0.3),
+        albu.OneOf([
+            albu.ElasticTransform(alpha=1, sigma=50, p=1),
+            albu.GridDistortion(p=1),
+        ], p=1),
         
         # Pixel-level transforms (applied to image only, not mask)
-        albu.RandomBrightnessContrast(
-            brightness_limit=0.3,
-            contrast_limit=0.3,
-            p=0.5
-        ),
+        albu.RandomBrightnessContrast(brightness_limit=0.1, contrast_limit=0.1, p=0.5),
         albu.RandomGamma(gamma_limit=(80, 120), p=0.3),
-        albu.GaussNoise(p=0.3),
         albu.GaussianBlur(blur_limit=(3, 5), p=0.2),
-        albu.CLAHE(clip_limit=2.0, p=0.3),
-        
-        # Dropout (applied to both image and mask)
-        albu.CoarseDropout(
-            num_holes_range=(1, 8),
-            hole_height_range=(8, 16),
-            hole_width_range=(8, 16),
-            p=0.3
-        ),
     ])
 
 
@@ -152,7 +135,7 @@ def get_augmentation_fn(
     return tf_augment
 
 
-class SegmentationAugmentation(tf.keras.layers.Layer):
+class SegmentationAugmentation(keras.layers.Layer):
     """
     Custom Keras layer for segmentation augmentation.
     
@@ -223,7 +206,7 @@ class SegmentationAugmentation(tf.keras.layers.Layer):
         return config
 
 
-def get_segmentation_augmentation() -> tf.keras.Sequential:
+def get_segmentation_augmentation() -> keras.Sequential:
     """
     Create TensorFlow-native augmentation pipeline for segmentation.
     
@@ -233,7 +216,7 @@ def get_segmentation_augmentation() -> tf.keras.Sequential:
     Returns:
         Keras Sequential model for augmentation.
     """
-    return tf.keras.Sequential([
-        tf.keras.layers.RandomFlip("horizontal"),
-        tf.keras.layers.RandomRotation(0.1),
+    return keras.Sequential([
+        keras.layers.RandomFlip("horizontal"),
+        keras.layers.RandomRotation(0.1),
     ], name="segmentation_augmentation")

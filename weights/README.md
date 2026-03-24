@@ -17,6 +17,9 @@ weights/
     ├── AttentionUNet_bce_tversky_best.keras
     ├── ResUNetPP_bce_tversky_best.keras
     └── SwinUNet_bce_tversky_best.keras
+└── onnx/                   # ONNX converted weights
+    ├── classification/
+    └── segmentation/
 ```
 
 ---
@@ -50,10 +53,15 @@ weights/
 
 ## File Format
 
-All weights are saved in Keras native format (`.keras`):
+All raw weights are saved in Keras native format (`.keras`):
 - Single file containing model architecture and weights
 - Fast loading with `tf.keras.models.load_model()`
 - Includes optimizer state for resuming training
+
+Exported weights for deployment are saved in ONNX format (`.onnx`):
+- Optimized for inference
+- Framework-agnostic
+- Used by the Streamlit application
 
 ---
 
@@ -144,6 +152,8 @@ git add .gitattributes
 git add weights/
 git commit -m "Add trained model weights"
 ```
+
+> **Note**: ONNX exported weights (`.onnx`) are generated locally and are ignored by version control.
 
 ---
 
